@@ -38,7 +38,7 @@ copy `curl`(在项目`android/curl`已经准备好了) 到你的手机或模拟�
 
 ### 安装python3.6
 
-- 推荐:[andconda](https://www.anaconda.com/download/)
+- 推荐:[andconda](https://www.anaconda.com/wnload/)
 - 安装openvc 执行命令 `pip install opencv-python`
 - 安装[jep](https://github.com/ninia/jep) : `pip install jep`
 - wind 用户将`<andconda 安装目录>\Lib\site-packages\jep` 添加到环境变量中去
