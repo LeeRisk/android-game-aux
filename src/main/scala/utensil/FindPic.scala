@@ -25,9 +25,6 @@ case class FindPic(original: OriginalImage,
 
   def noFind: Boolean = !isFind
 }
-//trait FindPicResult
-//case class IsFindPic(point: Point) extends FindPicResult
-//case class NoFindPic() extends FindPicResult
 
 
 object FindPic {

@@ -32,6 +32,8 @@ object RecAction {
   def apply(f: ClientRequest => Result): RecAction = (v1: ClientRequest) => f(v1)
 }
 
+case class EmEmptyException() extends Exception("em empty")
+
 
 class ClientActor() extends Actor {
   val logger         = LoggerFactory.getLogger("client-actor")

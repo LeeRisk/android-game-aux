@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import utensil.FindPic
 import Actions._
 
-object FindPoint {
+object Find {
   def apply(goal: GoalImage)(implicit clientRequest: ClientRequest) = {
     val fp = FindPic(clientRequest.image.toOriginal, goal)
     fp.point
@@ -14,62 +14,7 @@ object FindPoint {
 
 }
 
-class WarSixFourActor() extends Actor {
-  val logger = LoggerFactory.getLogger("war")
 
-  var sequence = (Sequence()
-    //    ~> touchReturns
-    //    ~> goToRoom
-    //    ~> utilFindAndTouch(10, Images.Adventure.adventure.toGoal)
-    //    ~> utilFind(10, Images.Adventure.grouping.toGoal)
-    //    ~> RecAction(c => Result.Success(Commands().addTap(Points.Area.one).addDelay(1000)))
-    //    ~> RecAction(c => Result.Success(Commands().addTap(Points.Area.six).addDelay(1000)))
-    //    ~> utilFind(10, Images.Area.six.toGoal)
-    //
-    //    ~> findAndTouch(Images.Adventure.grouping.toGoal)
-    //    ~> utilFindAndTouch(10, Images.start.toGoal)
-    next warPoint(Points.Adventure.AreaSix.b)
-    next end
-    )
-
-  def warPoint(point: Point) = (Sequence()
-    next utilFind(10, Images.returns.toGoal)
-    next RecAction(c => Result.Success(Commands().addTap(point).addDelay(1000)))
-    next startWar
-    next waitWarEnd
-    next sureWarEnd
-    )
-
-  def startWar = RecAction { implicit x =>
-    FindPoint(Images.start.toGoal) match {
-      case Some(point) => Result.Execution(Commands().addTap(point))
-      case None        => Result.Success()
-    }
-  }
-
-  def waitWarEnd = utilFind(100, Images.Adventure.totalTurn.toGoal)
-
-  def sureWarEnd = RecAction { implicit c =>
-    val a = FindPic(c.image.toOriginal, Images.returns.toGoal)
-    if(a.isFind)
-      Result.Success()
-    else
-      Result.Execution(Commands().addTap(Point(0, 0)))
-
-  }
-
-  def end = RecAction { implicit e =>
-    println("end")
-    ???
-  }
-
-
-  override def receive: Receive = {
-    case e: ClientRequest =>
-      sequence = sequence.run(e, sender())
-
-  }
-}
 
 class WdjActor() extends Actor {
   val logger = LoggerFactory.getLogger("wjd")
@@ -84,8 +29,8 @@ class WdjActor() extends Actor {
     next utilFind(10, Images.Wdj.shenShen.toGoal)
     next findAndTouch(Images.Wdj.shenShen.toGoal)
 
-    ~> war
-    ~> war
+    next war
+    next war
     next end
     )
 

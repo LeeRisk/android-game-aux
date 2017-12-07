@@ -7,6 +7,7 @@ object Images {
   val returns_gakuen = image("returns-gakuen.png")
   val returns_room   = image("returns-room.png")
   val start          = image("start.png")
+  val determine      = image("determine.png")
 
   object Area {
     val one   = image("area-one.png")
@@ -24,7 +25,6 @@ object Images {
     val grouping  = image("adventure-grouping.png")
     val totalTurn = image("adventure-total-turn.png")
     val mpEmpty   = image("adventure-mp-empty.png")
-
   }
 
   object Wdj {

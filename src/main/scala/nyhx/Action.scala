@@ -57,12 +57,6 @@ object Actions {
       .withGoal(Images.returns_room.toGoal)
       .run()
 
-  def tapWhenFind(image: GoalImage) = RecAction { implicit c =>
-    FindPoint(image) match {
-      case Some(point) => Result.Execution(Commands().addTap(point))
-      case None        => Result.Success()
-    }
-  }
 
   def utilFind(maxNum: Int = 100, image: GoalImage)(implicit patten: FindPic.Patten.Value = FindPic.Patten.Default): RecAction =
     FindPicAction(s"util find ${image.simpleName}")
@@ -85,9 +79,9 @@ object Actions {
       .withGoal(goalImage)
       .run()
 
-  def touchUtilNoFind(point: Point, image: GoalImage) =
+  def touchUtilNoFind( image: GoalImage,f: Point =>Point) =
     FindPicAction("find and touch")
-      .withIsFind(e => Result.Execution(Commands().addTap(point)))
+      .withIsFind(e => Result.Execution(Commands().addTap(f(e))))
       .withNoFind(() => Result.Success())
       .withGoal(image)
       .run()
