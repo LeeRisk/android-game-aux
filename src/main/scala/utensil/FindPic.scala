@@ -6,7 +6,7 @@ import utensil.PythonScript.findPic
 
 case class FindPic(original: OriginalImage,
                    goal: GoalImage,
-                   threshold: Double,
+                   threshold: Double=0.95,
                    patten: FindPic.Patten.Value = FindPic.Patten.Default) {
   lazy val (similarity, topLeftPoint) = {
     val (max, x, y) = {
@@ -28,7 +28,7 @@ object FindPic {
 
   object Patten extends Enumeration {
     val Default = Value("default")
-    val edge    = Value("edge")
+    val Edge    = Value("edge")
   }
 
 

@@ -18,6 +18,6 @@ def jvm_find_pic(original, goal, patten):
     return str((np.max(result), point[1], point[0]))
 
 
-# jvm_find_pic('../screen.png', '../images/武斗祭.png')
-jvm_find_pic("./screen.png",
-             "./images/wdj.png")
+# jvm_find_pic("./screen.png",
+#              "./images/wdj.png",
+#              "default")

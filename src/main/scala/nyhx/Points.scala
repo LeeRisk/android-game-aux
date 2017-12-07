@@ -8,15 +8,18 @@ object Points {
     val huPoZiQuan = Point(304, 164, "huPoZiQuan")
   }
 
-  object Adventure {
+  object Area {
+    val one   = Point(176, 76, "1")
+    val two   = Point(285, 74, "2")
+    val three = Point(391, 74, "3")
+    val four  = Point(509, 73, "4")
+    val five  = Point(626, 75, "5")
+    val six   = Point(742, 77, "6")
+  }
 
-    object Area {
-      val one   = Point(176, 76, "1")
-      val two   = Point(285, 74, "2")
-      val three = Point(391, 74, "3")
-      val four  = Point(509, 73, "4")
-      val five  = Point(626, 75, "5")
-      val six   = Point(742, 77, "6")
+  object Adventure {
+    object AreaSix{
+      val b = Point(353, 194,"b")
     }
 
     val next = Point(914, 306, "next")

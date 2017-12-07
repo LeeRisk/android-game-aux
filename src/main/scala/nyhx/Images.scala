@@ -8,6 +8,15 @@ object Images {
   val returns_room   = image("returns-room.png")
   val start          = image("start.png")
 
+  object Area {
+    val one   = image("area-one.png")
+    val two   = image("area-two.png")
+    val three = image("area-three.png")
+    val four  = image("area-four.png")
+    val five  = image("area-five.png")
+    val six   = image("six.png")
+  }
+
   object Adventure {
 
     val start     = Images.start

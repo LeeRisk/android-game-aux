@@ -15,7 +15,8 @@ class PythonScriptTest extends WordSpec {
     println(userDir)
     val result = findPic(
       s"$userDir/src/test/resources/screen-gruan.png",
-      s"$userDir/src/test/resources/wu_dou_ji.png")
+      s"$userDir/src/test/resources/wu_dou_ji.png",
+      "default")
     println(result)
     assert(result._1 > 0.97)
   }

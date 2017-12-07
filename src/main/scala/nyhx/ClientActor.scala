@@ -14,7 +14,7 @@ object Result {
 
   trait Continue extends Result
 
-  case class Success(commands: Commands=Commands()) extends Complete
+  case class Success(commands: Commands = Commands()) extends Complete
 
   case class Failure(exception: Exception) extends Complete {
     override def commands: Commands = throw exception
@@ -22,7 +22,7 @@ object Result {
 
   case class Execution(commands: Commands) extends Continue
 
-  case class Become(f: RecAction,commands: Commands=Commands()) extends Continue
+  case class Become(f: RecAction, commands: Commands = Commands()) extends Continue
 
 }
 
@@ -35,7 +35,7 @@ object RecAction {
 
 class ClientActor() extends Actor {
   val logger         = LoggerFactory.getLogger("client-actor")
-  var work: ActorRef = context.system.actorOf(Props(new WdjActor()))
+  var work: ActorRef = context.system.actorOf(Props(new WarSixFourActor()))
 
 
   override def receive = {
