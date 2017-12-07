@@ -17,12 +17,18 @@ case class FindPic(original: OriginalImage,
     max -> Point(x, y)
   }
 
+//  def result = if (isFind) IsFindPic(point.get) else NoFindPic()
+
   def point: Option[Point] = if(isFind) Some(topLeftPoint) else None
 
   def isFind: Boolean = similarity >= threshold
 
   def noFind: Boolean = !isFind
 }
+//trait FindPicResult
+//case class IsFindPic(point: Point) extends FindPicResult
+//case class NoFindPic() extends FindPicResult
+
 
 object FindPic {
 

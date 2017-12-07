@@ -57,6 +57,13 @@ object Actions {
       .withGoal(Images.returns_room.toGoal)
       .run()
 
+  def tapWhenFind(image: GoalImage) = RecAction { implicit c =>
+    FindPoint(image) match {
+      case Some(point) => Result.Execution(Commands().addTap(point))
+      case None        => Result.Success()
+    }
+  }
+
   def utilFind(maxNum: Int = 100, image: GoalImage)(implicit patten: FindPic.Patten.Value = FindPic.Patten.Default): RecAction =
     FindPicAction(s"util find ${image.simpleName}")
       .withIsFind(e => Result.Success())

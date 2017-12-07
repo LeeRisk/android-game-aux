@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory
 case class Sequence(seq: Seq[Either[RecAction, Sequence]] = Seq()) {
   val logger = LoggerFactory.getLogger("sequence")
 
-  def ~>(recAction: RecAction) = Sequence(seq :+ Left(recAction))
+  def next(recAction: RecAction) = Sequence(seq :+ Left(recAction))
 
-  def ~>(sequence: Sequence) = Sequence(seq :+ Right(sequence))
+  def next(sequence: Sequence) = Sequence(seq :+ Right(sequence))
 
   def run(x: ClientRequest, sender: ActorRef): Sequence = {
     require(seq.nonEmpty)

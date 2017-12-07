@@ -28,7 +28,6 @@ object Points {
   object Explore {
     val getPrize = Point(788, 448)
 
-    val Area = Adventure.Area
 
     object Node {
       val one   = Point(229, 441, "1")

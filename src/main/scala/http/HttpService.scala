@@ -18,9 +18,9 @@ import nyhx.ClientActor
 import org.slf4j.LoggerFactory
 
 
-
 import CollectRequestInfo.collectRequestInfo
-class HttpService{
+
+class HttpService {
   implicit val system          : ActorSystem              = ActorSystem()
   implicit val materializer    : ActorMaterializer        = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -40,14 +40,19 @@ class HttpService{
             .ask(ClientRequest(Image(file.pathAsString))).mapTo[Commands]
             .map(_.seq.map(_.toJsonString).mkString(";"))
 
-          onComplete(feature)(result => complete(ToResponseMarshallable.apply(result)))
+          onComplete(feature) {
+            case Success(x) => complete(x)
+            case Failure(x) =>
+              x.printStackTrace()
+              System.exit(-1)
+              ???
+          }
         }
       }) ~ get(path("hello")(complete("hello world")))
 
   lazy val http = Http().bindAndHandle(collectRequestInfo(route), "0.0.0.0", 9898)
 
   val log = LoggerFactory getLogger "http"
-
 
 
 }

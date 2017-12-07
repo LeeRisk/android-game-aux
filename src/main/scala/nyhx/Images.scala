@@ -14,7 +14,7 @@ object Images {
     val three = image("area-three.png")
     val four  = image("area-four.png")
     val five  = image("area-five.png")
-    val six   = image("six.png")
+    val six   = image("area-six.png")
   }
 
   object Adventure {
