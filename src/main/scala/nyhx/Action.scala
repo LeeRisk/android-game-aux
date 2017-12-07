@@ -1,6 +1,6 @@
 package nyhx
 
-import models.{GoalImage, Point}
+import models.{Commands, GoalImage, Point}
 import org.slf4j.LoggerFactory
 import utensil.FindPic
 
@@ -38,6 +38,39 @@ case class FindPicAction(name: String,
   }
 }
 
-object HelpFunc {
+object Actions {
+  def touchReturns: RecAction =
+    FindPicAction("touch return")
+      .withIsFind(e => Result.Execution(Commands().addTap(e).addDelay(1000)))
+      .withNoFind(() => Result.Success(Commands()))
+      .withGoal(Images.returns.toGoal)
+      .run()
 
+  def goToRoom: RecAction =
+    FindPicAction("go to room")
+      .withIsFind(e => Result.Execution(Commands().addTap(e).addDelay(1000)))
+      .withNoFind(() => Result.Success(Commands()))
+      .withGoal(Images.returns_room.toGoal)
+      .run()
+
+  def utilFind(maxNum: Int = 100)(image: GoalImage): RecAction =
+    FindPicAction(s"util find ${image.simpleName}")
+      .withIsFind(e => Result.Success())
+      .withNoFind(() => Result.Become(utilFind(maxNum - 1)(image)))
+      .withGoal(image)
+      .run()
+
+  def utilFindAndTouch(maxNum:Int=100)(image:GoalImage):RecAction=
+    FindPicAction(s"util find and touch ${image.simpleName}")
+      .withIsFind(e => Result.Success(Commands().addTap(e)))
+      .withNoFind(() => Result.Become(utilFind(maxNum - 1)(image)))
+      .withGoal(image)
+      .run()
+
+  def findAndTouch(goalImage: GoalImage): RecAction =
+    FindPicAction("find and touch")
+      .withIsFind(e => Result.Success(Commands().addTap(e)))
+      .withNoFind(() => Result.Failure(new Exception(s"no find ${goalImage.simpleName}")))
+      .withGoal(goalImage)
+      .run()
 }

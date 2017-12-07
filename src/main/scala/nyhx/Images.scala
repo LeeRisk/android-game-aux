@@ -5,7 +5,18 @@ import better.files.File
 object Images {
   val returns        = image("returns.png")
   val returns_gakuen = image("returns-gakuen.png")
-  val returns_room = image("returns-room.png")
+  val returns_room   = image("returns-room.png")
+  val start          = image("start.png")
+
+  object Adventure {
+
+    val start     = Images.start
+    val adventure = image("adventure.png")
+    val grouping  = image("adventure-grouping.png")
+    val totalTurn = image("adventure-total-turn.png")
+    val mpEmpty   = image("adventure-mp-empty.png")
+
+  }
 
   object Wdj {
     val wuDouJi     = image("wdj.png")
@@ -39,12 +50,12 @@ object Images {
   //  object Adventure {
   //    val adventure = image("adventure.png")
   //    val start     = ImagePaths.start
-  //    val bianZu    = image("冒险-编组.png")
+  //    val bianZu    = image("adventure-grouping.png")
   //    val node      = image("节点.png")
   //    val selectA   = image("选择A.png")
   //
-  //    val zongHuiHe = image("冒险-总回合.png")
-  //    val mpEmpty   = image("mp-empty.png")
+  //    val zongHuiHe = image("adventure-total-turn.png")
+  //    val mpEmpty   = image("adventure-mp-empty.png")
   //  }
   //
   //  object Explore {
@@ -57,5 +68,5 @@ object Images {
   //
   //  }
 
-  def image(s: String) = models.Image(File(s"images/$s").pathAsString)
+  def image(s: String) = models.Image(File(s"images-goal/$s").pathAsString)
 }

@@ -4,43 +4,18 @@ import akka.actor.{Actor, ActorRef}
 import models._
 import org.slf4j.LoggerFactory
 import utensil.FindPic
+import Actions._
 
+class WarSixFourActor() extends Actor {
+  val logger = LoggerFactory.getLogger("war")
 
-case class Sequence(seq: Seq[Either[RecAction, Sequence]] = Seq()) {
-  val logger = LoggerFactory.getLogger("sequence")
+  var sequence = (Sequence()
+    ~> touchReturns
+    ~> goToRoom
+    ~> utilFindAndTouch(10)(Images.Adventure.adventure.toGoal)
+    )
 
-  def ~>(recAction: RecAction) = Sequence(seq :+ Left(recAction))
-
-  def ~>(sequence: Sequence) = Sequence(seq :+ Right(sequence))
-
-  def run(x: ClientRequest, sender: ActorRef): Sequence = {
-    require(seq.nonEmpty)
-    seq.head match {
-      case Left(recAction) =>
-        val result = recAction(x)
-        result match {
-          case Result.Become(f, commands) =>
-            sender ! commands
-            Sequence(Left(f) +: seq.tail)
-          case Result.Failure(exception)  =>
-            throw exception
-          case Result.Execution(commands) =>
-            sender ! commands
-            this
-          case Result.Success(commands)   =>
-            sender ! commands
-            Sequence(seq.tail)
-        }
-      case Right(sequence) =>
-        val result = sequence.run(x, sender)
-        if(result.isEnd)
-          Sequence(seq.tail)
-        else
-          Sequence(Right(result) +: seq.tail)
-    }
-  }
-
-  def isEnd = seq.isEmpty
+  override def receive: Receive = ???
 }
 
 class WdjActor() extends Actor {
@@ -88,32 +63,5 @@ class WdjActor() extends Actor {
 
   }
 
-  def touchReturns: RecAction =
-    FindPicAction("touch return")
-      .withIsFind(e => Result.Execution(Commands().addTap(e).addDelay(1000)))
-      .withNoFind(() => Result.Success(Commands()))
-      .withGoal(Images.returns.toGoal)
-      .run()
 
-  def goToRoom: RecAction =
-    FindPicAction("go to room")
-      .withIsFind(e => Result.Execution(Commands().addTap(e).addDelay(1000)))
-      .withNoFind(() => Result.Success(Commands()))
-      .withGoal(Images.returns_room.toGoal)
-      .run()
-
-  def utilFind(maxNum: Int = 100)(image: GoalImage): RecAction =
-    FindPicAction(s"util find ${image.simpleName}")
-      .withIsFind(e => Result.Success())
-      .withNoFind(() => Result.Become(utilFind(maxNum - 1)(image)))
-      .withGoal(image)
-      .run()
-
-
-  def findAndTouch(goalImage: GoalImage) =
-    FindPicAction("find and touch")
-      .withIsFind(e => Result.Success(Commands().addTap(e)))
-      .withNoFind(() => Result.Failure(new Exception(s"no find ${goalImage.simpleName}")))
-      .withGoal(goalImage)
-      .run()
 }
