@@ -5,6 +5,7 @@ import scala.language.implicitConversions
 import akka.actor.{Actor, ActorRef}
 import models.{ClientRequest, Commands}
 import nyhx.{Images, NoFindPicException, RecAction, Result}
+import org.slf4j.LoggerFactory
 import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 
 
@@ -33,13 +34,13 @@ object Patten {
 
 }
 
-case class Sequence(actions: Seq[Patten]) {
+case class Sequence(actions: Seq[Patten] = Nil) {
 
-  def next(recAction: Action) = Sequence(Patten.Next(recAction) +: actions)
+  def next(recAction: Action) = Sequence(actions :+ Patten.Next(recAction))
 
-  def util(recAction: RecAction, maxNum: Int) = Sequence(Patten.Util(recAction, maxNum) +: actions)
+  def util(recAction: RecAction, maxNum: Int) = Sequence(actions :+ Patten.Util(recAction, maxNum))
 
-  def repeat(action: Action, num: Int) = Sequence(Patten.Repeat(action, num) +: actions)
+  def repeat(action: Action, num: Int) = Sequence(actions :+ Patten.Repeat(action, num))
 
   val isEnd = actions.isEmpty
 
@@ -82,40 +83,51 @@ object Sequence {
 
     val action = sequence.head
     action match {
-      case Next(Action.Rec(action))         => runByRec(action)
-      case Next(Action.Sequ(sequ))          => runBySequence(sequ)
-      case Util(Action.Rec(recAction), 0)   => throw new Exception("")
-      case Util(Action.Rec(recAction), num) => runByRec(recAction)
-      case Repeat(action, 0)                => run(Sequence(sequence.tail))(clientRequest, sender)
-      case Repeat(action, num)              => run(Sequence(Next(action) +: Repeat(action, num - 1) +: sequence.tail))(clientRequest, sender)
+      case Next(Action.Rec(action)) => runByRec(action)
+      case Next(Action.Sequ(sequ))  => runBySequence(sequ)
+      case Util(recAction, 0)       => throw new Exception("")
+      case Util(recAction, num)     =>
+        execRecAction(recAction) match {
+          case Some(x) => Sequence(Patten.Util(x, num - 1) +: sequence.tail)
+          case None    => Sequence(sequence.tail)
+        }
+      case Repeat(action, 0)        => run(Sequence(sequence.tail))(clientRequest, sender)
+      case Repeat(action, num)      => run(Sequence(Next(action) +: Repeat(action, num - 1) +: sequence.tail))(clientRequest, sender)
     }
   }
 }
 
 class WarActor extends Actor {
-  var action = List(
-    touchReturns,
-    goToRoom,
-    mustFind(findAdventure(_)),
-    touchAdventure,
+  var action =
+    (Sequence()
+      next touchReturns
+      next goToRoom
+      next mustFind(findAdventure(_))
+      next touchAdventure
+      util(waitFindGrouping, 10)
+      next end
+      )
 
-  )
+  def end = RecAction { implicit c => println("end"); ??? }
 
   override def receive: Receive = {
     case c: ClientRequest =>
-      action.head(c) match {
-        case Result.Failure(x)   => throw x
-        case Result.Execution(x) =>
-          sender() ! x
-        case Result.Success(x)   =>
-          sender() ! x
-          action = action.tail
-      }
+      val result = Sequence.run(action)(c, sender())
+      action = result
   }
 
+  def waitFindGrouping = RecAction { implicit c =>
+    findGrouping.run() match {
+      case IsFindPic(point) => Result.Success()
+      case NoFindPic()      => Result.Execution(Commands())
+    }
+  }
+
+  val logger = LoggerFactory.getLogger("war")
 
   def touchReturns = RecAction { implicit clientRequest =>
     val result = findReturns.run()
+    logger.info(s"find return :${result.isFind}")
     result match {
       case IsFindPic(point) => Result.Execution(Commands().addTap(point))
       case NoFindPic()      => Result.Success()
@@ -162,4 +174,7 @@ class WarActor extends Actor {
     .withGoal(Images.Adventure.adventure.toGoal)
     .withOriginal(clientRequest.image.toOriginal)
 
+  def findGrouping(implicit clientRequest: ClientRequest) = FindPicBuild()
+    .withGoal(Images.Adventure.grouping.toGoal)
+    .withOriginal(clientRequest.image.toOriginal)
 }

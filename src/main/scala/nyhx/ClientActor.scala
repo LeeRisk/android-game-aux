@@ -2,6 +2,7 @@ package nyhx
 
 import akka.actor.{Actor, ActorRef, Props}
 import models.{ClientRequest, Commands}
+import nyhx.block.WarActor
 import nyhx.squence.WarSixFourActor
 import org.slf4j.LoggerFactory
 
@@ -39,7 +40,7 @@ case class NoFindPicException(s: String) extends Exception(s)
 
 class ClientActor() extends Actor {
   val logger         = LoggerFactory.getLogger("client-actor")
-  var work: ActorRef = context.system.actorOf(Props(new WarSixFourActor()))
+  var work: ActorRef = context.system.actorOf(Props(new WarActor()))
 
 
   override def receive = {

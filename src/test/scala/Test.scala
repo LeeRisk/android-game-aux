@@ -34,7 +34,7 @@ object Test {
   def f[Arr <: Hello.Image](hello: Hello[Arr])
                            (implicit x: Arr <:< (Hello.Goal with Hello.Original)) = hello
 
-  println("hello world")
-    f(new Hello[Hello.Nothing](None, None))
+//  println("hello world")
+//    f(new Hello[Hello.Nothing](None, None))
 //  f(Hello().withGoal(new Goal {}).withOriginal(new Original {}))
 }
