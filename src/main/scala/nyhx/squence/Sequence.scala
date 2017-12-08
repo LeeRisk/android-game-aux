@@ -1,7 +1,8 @@
-package nyhx
+package nyhx.squence
 
 import akka.actor.ActorRef
 import models.ClientRequest
+import nyhx.{RecAction, Result}
 import org.slf4j.LoggerFactory
 
 //trait Task

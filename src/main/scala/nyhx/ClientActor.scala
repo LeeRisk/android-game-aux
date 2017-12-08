@@ -2,6 +2,7 @@ package nyhx
 
 import akka.actor.{Actor, ActorRef, Props}
 import models.{ClientRequest, Commands}
+import nyhx.squence.WarSixFourActor
 import org.slf4j.LoggerFactory
 
 sealed trait Result {
@@ -34,6 +35,7 @@ object RecAction {
 
 case class EmEmptyException() extends Exception("em empty")
 
+case class NoFindPicException(s: String) extends Exception(s)
 
 class ClientActor() extends Actor {
   val logger         = LoggerFactory.getLogger("client-actor")

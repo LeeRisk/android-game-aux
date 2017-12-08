@@ -1,17 +1,17 @@
-package nyhx
+package nyhx.squence
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.Actor
 import models._
+import nyhx.{Images, RecAction, Result}
+import nyhx.squence.Actions._
 import org.slf4j.LoggerFactory
 import utensil.FindPic
-import Actions._
 
 object Find {
   def apply(goal: GoalImage)(implicit clientRequest: ClientRequest) = {
     val fp = FindPic(clientRequest.image.toOriginal, goal)
     fp.point
   }
-
 }
 
 
@@ -45,7 +45,6 @@ class WdjActor() extends Actor {
   def end = RecAction { implicit e =>
     println("end")
     ???
-
   }
 
   def touchWarResult(goal: GoalImage) =

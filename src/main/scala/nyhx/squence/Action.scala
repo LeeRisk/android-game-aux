@@ -1,6 +1,7 @@
-package nyhx
+package nyhx.squence
 
 import models.{Commands, GoalImage, Point}
+import nyhx.{Images, RecAction, Result}
 import org.slf4j.LoggerFactory
 import utensil.FindPic
 

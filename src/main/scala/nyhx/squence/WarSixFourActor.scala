@@ -1,10 +1,10 @@
-package nyhx
+package nyhx.squence
 
 import akka.actor.Actor
 import models.{ClientRequest, Commands, Point}
-import nyhx.Actions.{findAndTouch, utilFind, utilFindAndTouch}
+import nyhx.squence.Actions.{findAndTouch, utilFind, utilFindAndTouch, _}
+import nyhx._
 import org.slf4j.LoggerFactory
-import Actions._
 
 trait WarHelp {
   val logger = LoggerFactory.getLogger("war")
