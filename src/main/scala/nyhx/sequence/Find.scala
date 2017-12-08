@@ -21,6 +21,9 @@ object Find {
   def mpEmpty(implicit clientRequest: ClientRequest) = find(Images.Adventure.mpEmpty.toGoal)
 
   def navigateCondition(implicit clientRequest: ClientRequest) = find(Images.Adventure.navigateCondition.toGoal)
+
+  def determine(implicit clientRequest: ClientRequest) = find(Images.determine.toGoal)
+
   def find(image: GoalImage)(implicit clientRequest: ClientRequest) = FindPicBuild()
     .withGoal(image.toGoal)
     .withOriginal(clientRequest.image.toOriginal)

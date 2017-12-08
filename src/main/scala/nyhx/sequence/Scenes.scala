@@ -19,6 +19,14 @@ trait Scenes {
       }
   }
 
+  def touchDetermine = RecAction { implicit clientRequest =>
+    val result = Find.returns.run()
+    logger.info(s"find determine :${result.isFind}")
+    result match {
+      case IsFindPic(point) => Result.Execution(Commands().addTap(point))
+      case NoFindPic()      => Result.Failure(NoFindPicException("no find determine"))
+    }
+  }
 
   def touchReturns = RecAction { implicit clientRequest =>
     val result = Find.returns.run()

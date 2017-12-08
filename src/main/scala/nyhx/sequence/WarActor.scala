@@ -10,7 +10,7 @@ import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 
 
 class WarActor extends Actor with Scenes {
-  var action = ???
+  var action = warPoint_B
 
 
   /**
@@ -28,10 +28,15 @@ class WarActor extends Actor with Scenes {
     util(waitFindGrouping, 10)
     )
 
-  def war = {
-
+  def warPoint_B = {
+    // goto adventure
     // war point(B)
     // exit war
+    (Sequence()
+      next warReady
+      next warPoint(Points.Adventure.AreaSix.b)
+      next warEnd
+      )
   }
 
 
@@ -40,7 +45,7 @@ class WarActor extends Actor with Scenes {
   // tap start
   def warReady = (Sequence()
     next touchGrouping
-
+    next checkMpEmpty
     next touchStart
     )
 
@@ -53,6 +58,13 @@ class WarActor extends Actor with Scenes {
     next touchStart
     next waitWarEnd
     next sureWarReward
+    )
+
+  def warEnd = (Sequence()
+    next touchReturns
+    next touchDetermine
+    util(waitFindGrouping, 10)
+
     )
 
 
@@ -98,6 +110,7 @@ class WarActor extends Actor with Scenes {
     }
   }
 
+
   def waitFindGrouping = RecAction { implicit c =>
     val result = Find.grouping.run()
     logger.info(s"wait find grouping : (${result.isFind})")
@@ -106,7 +119,8 @@ class WarActor extends Actor with Scenes {
       case NoFindPic()      => Result.Execution(Commands())
     }
   }
-  def checkMpEmpty = RecAction{implicit c=>
+
+  def checkMpEmpty = RecAction { implicit c =>
     val result = Find.mpEmpty.run()
     result match {
       case IsFindPic(point) =>
@@ -120,6 +134,9 @@ class WarActor extends Actor with Scenes {
 
   def justTap(point: Point, delay: Int) =
     RecAction(e => Result.Success(Commands().addTap(point).addDelay(delay)))
+
+  def justDelay(delay: Int) =
+    RecAction(e => Result.Success(Commands().addDelay(delay)))
 
   def mustFind[T <: FindPicBuild.Request](f: ClientRequest => FindPicBuild[T]) = RecAction { implicit clientRequest =>
     val findPicBuild = f(clientRequest)
