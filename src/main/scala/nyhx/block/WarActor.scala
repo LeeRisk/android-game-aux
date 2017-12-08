@@ -1,17 +1,98 @@
 package nyhx.block
 
-import java.util.concurrent.LinkedBlockingDeque
+import scala.language.implicitConversions
 
-import akka.actor.Actor
-import models.{ClientRequest, Commands, Point}
+import akka.actor.{Actor, ActorRef}
+import models.{ClientRequest, Commands}
 import nyhx.{Images, NoFindPicException, RecAction, Result}
 import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 
+
+trait Action
+
+object Action {
+  implicit def rec2action(rec: RecAction): Rec = Rec(rec)
+
+  implicit def sequ2action(sequence: Sequence): Sequ = Sequ(sequence)
+
+  case class Rec(recAction: RecAction) extends Action
+
+  case class Sequ(sequence: Sequence) extends Action
+
+}
+
+trait Patten
+
+object Patten {
+
+  case class Next(action: Action) extends Patten
+
+  case class Util(action: RecAction, num: Int) extends Patten
+
+  case class Repeat(action: Action, num: Int) extends Patten
+
+}
+
+case class Sequence(actions: Seq[Patten]) {
+
+  def next(recAction: Action) = Sequence(Patten.Next(recAction) +: actions)
+
+  def util(recAction: RecAction, maxNum: Int) = Sequence(Patten.Util(recAction, maxNum) +: actions)
+
+  def repeat(action: Action, num: Int) = Sequence(Patten.Repeat(action, num) +: actions)
+
+  val isEnd = actions.isEmpty
+
+  def head = actions.head
+
+  def tail = actions.tail
+}
+
+object Sequence {
+
+  import Patten._
+
+  def run(sequence: Sequence)(clientRequest: ClientRequest, sender: ActorRef): Sequence = {
+    def execRecAction(recAction: RecAction) = recAction(clientRequest) match {
+      case Result.Failure(x)   => throw x
+      case Result.Execution(x) =>
+        sender ! x
+        Some(recAction)
+      case Result.Success(x)   =>
+        sender ! x
+        None
+    }
+
+    def runByRec(action: RecAction) = {
+      val result = execRecAction(action)
+      result match {
+        case Some(x) => Sequence(Patten.Next(x) +: sequence.tail)
+        case None    => Sequence(sequence.tail)
+      }
+    }
+
+    def runBySequence(sequ: Sequence) = {
+      val result = run(sequ)(clientRequest, sender)
+      if(result.isEnd)
+        Sequence(sequence.tail)
+      else
+        Sequence(Patten.Next(result) +: sequence.tail)
+
+    }
+
+    val action = sequence.head
+    action match {
+      case Next(Action.Rec(action))         => runByRec(action)
+      case Next(Action.Sequ(sequ))          => runBySequence(sequ)
+      case Util(Action.Rec(recAction), 0)   => throw new Exception("")
+      case Util(Action.Rec(recAction), num) => runByRec(recAction)
+      case Repeat(action, 0)                => run(Sequence(sequence.tail))(clientRequest, sender)
+      case Repeat(action, num)              => run(Sequence(Next(action) +: Repeat(action, num - 1) +: sequence.tail))(clientRequest, sender)
+    }
+  }
+}
+
 class WarActor extends Actor {
-  val x = new LinkedBlockingDeque[ClientRequest]()
-
-  implicit def getNext: () => ClientRequest = () => x.pollFirst()
-
   var action = List(
     touchReturns,
     goToRoom,
@@ -19,11 +100,6 @@ class WarActor extends Actor {
     touchAdventure,
 
   )
-
-
-  //  def goToArea(area:Point) = RecAction{
-  //
-  //  }
 
   override def receive: Receive = {
     case c: ClientRequest =>
