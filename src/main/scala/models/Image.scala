@@ -12,7 +12,7 @@ class Image(__name: String) {
       __name
   }
 
-  def simpleName = name.split("/|\\\\").last
+  def simpleName = name.split("/|\\\\").last.split("\\.").head
 
   def toGoal = GoalImage(__name)
 

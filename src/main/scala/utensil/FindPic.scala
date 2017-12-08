@@ -61,11 +61,10 @@ case class IsFindPic(topLeftPoint: Point) extends FindPicResult
 
 case class NoFindPic() extends FindPicResult
 
-class FindPicBuild[_Arr] private(val original: Option[OriginalImage],
+class FindPicBuild[+Arr] private(val original: Option[OriginalImage],
                                  val goal: Option[GoalImage],
                                  val threshold: Double = 0.95,
                                  val patten: FindPic.Patten.Value = FindPic.Patten.Default) {
-  type Arr = _Arr
 
   def withGoal(goal: GoalImage) =
     new FindPicBuild[Arr with FindPicBuild.Goal](goal = Some(goal), original = original, threshold = threshold, patten = patten)

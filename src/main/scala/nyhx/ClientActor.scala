@@ -3,7 +3,6 @@ package nyhx
 import akka.actor.{Actor, ActorRef, Props}
 import models.{ClientRequest, Commands}
 import nyhx.sequence.WarActor
-import nyhx.back.WarSixFourActor
 import org.slf4j.LoggerFactory
 
 sealed trait Result {

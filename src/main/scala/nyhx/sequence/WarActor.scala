@@ -8,9 +8,14 @@ import nyhx._
 import org.slf4j.LoggerFactory
 import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 
+import Find.findPicBuilding2FindAux
 
 class WarActor extends Actor with Scenes {
-  var action = warPoint_B
+  var action = (Sequence("war")
+    next goToAdventure
+    next goToWarArea(Points.Area.six, 4)
+    repeat(warPoint_B, 100)
+    )
 
 
   /**
@@ -20,19 +25,19 @@ class WarActor extends Actor with Scenes {
     * tap adventure
     * -- end
     */
-  def goToAdventure = (Sequence()
+  def goToAdventure = (Sequence("goToAdventure")
     next touchReturns
     next goToRoom
     next mustFind(Find.adventure(_))
-    next touchAdventure
-    util(waitFindGrouping, 10)
+    next Find.adventure.touch
+    util(Find.grouping.waitFind, 10)
     )
 
   def warPoint_B = {
     // goto adventure
     // war point(B)
     // exit war
-    (Sequence()
+    (Sequence("warPoint_B")
       next warReady
       next warPoint(Points.Adventure.AreaSix.b)
       next warEnd
@@ -43,33 +48,37 @@ class WarActor extends Actor with Scenes {
   // tap grouping
   // check mp
   // tap start
-  def warReady = (Sequence()
-    next touchGrouping
+  def warReady = (Sequence("warReady")
+    next Find.grouping.touch
     next checkMpEmpty
-    next touchStart
+    next Find.start.touch
     )
 
   // tap point
   // tap start
   // wait war end
   // sure reward
-  def warPoint(point: Point) = (Sequence()
+  def warPoint(point: Point) = (Sequence("warPoint")
+    next Find.navigateCondition.waitFind
     next justTap(point, 2000)
-    next touchStart
+    next Find.start.waitFind
+    next Find.start.touch
     next waitWarEnd
     next sureWarReward
     )
 
-  def warEnd = (Sequence()
-    next touchReturns
-    next touchDetermine
-    util(waitFindGrouping, 10)
+  def warEnd = (Sequence("warEnd")
+    next Find.returns.waitFind
+    next Find.returns.touch
+    next Find.determine.waitFind
+    next Find.determine.touch
+    util(Find.grouping.waitFind, 10)
 
     )
 
 
   def sureWarReward = RecAction { implicit c =>
-    val result = Find.navigateCondition.run()
+    val result = Find.navigateCondition(c).run()
 
     result match {
       case IsFindPic(point) =>
@@ -82,15 +91,7 @@ class WarActor extends Actor with Scenes {
     }
   }
 
-  def waitWarEnd = RecAction { implicit c =>
-    val result = Find.totalTurn.run()
-    logger.info(s"war is end : ${result.isFind}")
-    result match {
-      case IsFindPic(point) => Result.Success()
-      case NoFindPic()      => Result.Execution(Commands())
-    }
-  }
-
+  def waitWarEnd = Find.totalTurn.waitFind
 
   def goToWarArea(area: Point, zone: Int) = RecAction { implicit c =>
     val toArea = Commands()
@@ -101,32 +102,15 @@ class WarActor extends Actor with Scenes {
     )
   }
 
-  def touchGrouping = RecAction { implicit c =>
-    val result = Find.grouping.run()
-    logger.info(s"find grouping : (${result.isFind})")
-    result match {
-      case IsFindPic(point) => Result.Success(Commands().addTap(point))
-      case NoFindPic()      => Result.Failure(NoFindPicException("grouping"))
-    }
-  }
-
-
-  def waitFindGrouping = RecAction { implicit c =>
-    val result = Find.grouping.run()
-    logger.info(s"wait find grouping : (${result.isFind})")
-    result match {
-      case IsFindPic(point) => Result.Success()
-      case NoFindPic()      => Result.Execution(Commands())
-    }
-  }
-
   def checkMpEmpty = RecAction { implicit c =>
-    val result = Find.mpEmpty.run()
+    val result = Find.mpEmpty(c).run()
     result match {
       case IsFindPic(point) =>
         logger.warn("mp empty in war;")
         Result.Failure(EmEmptyException())
-      case NoFindPic()      => Result.Execution(Commands())
+      case NoFindPic()      =>
+        logger.warn("check mp success;")
+        Result.Success(Commands())
     }
   }
 

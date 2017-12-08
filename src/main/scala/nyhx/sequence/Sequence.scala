@@ -5,8 +5,11 @@ import scala.language.implicitConversions
 import akka.actor.ActorRef
 import models.ClientRequest
 import nyhx.{RecAction, Result}
+import org.slf4j.LoggerFactory
 
-trait Action
+trait Action {
+  def name = ""
+}
 
 object Action {
   implicit def rec2action(rec: RecAction): Rec = Rec(rec)
@@ -15,7 +18,9 @@ object Action {
 
   case class Rec(recAction: RecAction) extends Action
 
-  case class Sequ(sequence: Sequence) extends Action
+  case class Sequ(sequence: Sequence) extends Action {
+    override def name = sequence.name
+  }
 
 }
 
@@ -27,7 +32,7 @@ object Patten {
 
   case class Util(action: RecAction, num: Int) extends Patten
 
-  case class Repeat(action: Action, num: Int) extends Patten
+  case class Repeat(action: Action, currNum: Int, maxNum: Int) extends Patten
 
 }
 
@@ -49,17 +54,17 @@ object Sequence {
     def runByRec(action: RecAction) = {
       val result = execRecAction(action)
       result match {
-        case Some(x) => Sequence(Patten.Next(x) +: sequence.tail)
-        case None    => Sequence(sequence.tail)
+        case Some(x) => Sequence(sequence.name, Patten.Next(x) +: sequence.tail)
+        case None    => Sequence(sequence.name, sequence.tail)
       }
     }
 
     def runBySequence(sequ: Sequence) = {
       val result = run(sequ)(clientRequest, sender)
       if(result.isEnd)
-        Sequence(sequence.tail)
+        Sequence(sequence.name, sequence.tail)
       else
-        Sequence(Patten.Next(result) +: sequence.tail)
+        Sequence(sequence.name, Patten.Next(result) +: sequence.tail)
 
     }
 
@@ -71,27 +76,33 @@ object Sequence {
       case Util(recAction, 0)   => throw new Exception("")
       case Util(recAction, num) =>
         execRecAction(recAction) match {
-          case Some(x) => Sequence(Patten.Util(x, num - 1) +: sequence.tail)
-          case None    => Sequence(sequence.tail)
+          case Some(x) => Sequence(sequence.name, Patten.Util(x, num - 1) +: sequence.tail)
+          case None    => Sequence(sequence.name, sequence.tail)
         }
 
-      case Repeat(action, 0)   => run(Sequence(sequence.tail))(clientRequest, sender)
-      case Repeat(action, num) => run(Sequence(Next(action) +: Repeat(action, num - 1) +: sequence.tail))(clientRequest, sender)
+      case Repeat(action, currNum, maxNum) if currNum == maxNum =>
+        run(Sequence(sequence.name, sequence.tail))(clientRequest, sender)
+      case Repeat(action, currNum, maxNum)                      =>
+        logger.info(s"repeat [${action.name}] $currNum/$maxNum ")
+        run(Sequence(sequence.name, Next(action) +: Repeat(action, currNum +1, maxNum) +: sequence.tail))(clientRequest, sender)
     }
   }
+
+  val logger = LoggerFactory.getLogger("sequence")
 }
 
-case class Sequence(actions: Seq[Patten] = Nil) {
+case class Sequence(name: String, actions: Seq[Patten] = Nil) {
 
-  def next(recAction: Action) = Sequence(actions :+ Patten.Next(recAction))
+  def next(recAction: Action) = Sequence(name, actions :+ Patten.Next(recAction))
 
-  def util(recAction: RecAction, maxNum: Int) = Sequence(actions :+ Patten.Util(recAction, maxNum))
+  def util(recAction: RecAction, maxNum: Int) = Sequence(name, actions :+ Patten.Util(recAction, maxNum))
 
-  def repeat(action: Action, num: Int) = Sequence(actions :+ Patten.Repeat(action, num))
+  def repeat(action: Action, num: Int) = Sequence(name, actions :+ Patten.Repeat(action, 0, num))
 
   val isEnd = actions.isEmpty
 
   def head = actions.head
 
   def tail = actions.tail
+
 }
