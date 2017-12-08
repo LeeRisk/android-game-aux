@@ -1,9 +1,9 @@
-package nyhx.squence
+package nyhx.back
 
 import akka.actor.Actor
 import models._
 import nyhx.{Images, RecAction, Result}
-import nyhx.squence.Actions._
+import nyhx.back.Actions._
 import org.slf4j.LoggerFactory
 import utensil.FindPic
 

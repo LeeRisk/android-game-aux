@@ -20,11 +20,12 @@ object Images {
 
   object Adventure {
 
-    val start     = Images.start
-    val adventure = image("adventure.png")
-    val grouping  = image("adventure-grouping.png")
-    val totalTurn = image("adventure-total-turn.png")
-    val mpEmpty   = image("adventure-mp-empty.png")
+    val start             = Images.start
+    val adventure         = image("adventure.png")
+    val grouping          = image("adventure-grouping.png")
+    val totalTurn         = image("adventure-total-turn.png")
+    val mpEmpty           = image("adventure-mp-empty.png")
+    val navigateCondition = image("adventure-navigate-condition.png")
   }
 
   object Wdj {

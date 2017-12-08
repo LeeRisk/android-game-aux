@@ -1,4 +1,4 @@
-package nyhx.squence
+package nyhx.back
 
 import models.{Commands, GoalImage, Point}
 import nyhx.{Images, RecAction, Result}

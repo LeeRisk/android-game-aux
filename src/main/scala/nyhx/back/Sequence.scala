@@ -1,4 +1,4 @@
-package nyhx.squence
+package nyhx.back
 
 import akka.actor.ActorRef
 import models.ClientRequest

@@ -1,8 +1,8 @@
-package nyhx.squence
+package nyhx.back
 
 import akka.actor.Actor
 import models.{ClientRequest, Commands, Point}
-import nyhx.squence.Actions.{findAndTouch, utilFind, utilFindAndTouch, _}
+import nyhx.back.Actions.{findAndTouch, utilFind, utilFindAndTouch, _}
 import nyhx._
 import org.slf4j.LoggerFactory
 
