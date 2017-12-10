@@ -8,7 +8,7 @@
 - 找图功能辣鸡 不支持各种cnn model 如用vgg16,rec50进行feature提取
 ### 原理
 
-- 在手机模拟器上运行按键精灵
+- 在手机或模拟器上运行按键精灵
 - 通过按键精灵 截取屏幕保存到文件
 - 在将文件发送(通过`curl`)到服务器端进行分析处理(如,找图,找色),决定要执行那些命令(如:点击(X,Y)...)
 - 然后在按键精灵上执行这些命令
@@ -101,7 +101,7 @@ case class GoalImage(__name: String) extends Image(__name)
 case class OriginalImage(__name: String) extends Image(__name)
 ```
 然后呢,让我想想,我们希望设计一个`Build`模式如 `Build.withOriginal().withGoal().withThreshold()`;  (node `Threshold`:相似度大于这个值,就认为找到了)  
-但是同时又希望`Original`和`Goal` 是必传的,如果没有同时跳用 `withOriginal` 和 `withGoal` 就给个编译错误,  
+但是同时又希望`Original`和`Goal` 是必传的,如果没有都赋值的话,就编译错误
 其他的属性不做要求(如`Threshold`)没有就给个默认值  
 
 既然要控制编译通过和不通过,那意味着我们要把这些信息放进类型中  
@@ -219,7 +219,7 @@ val route = post(
 
 好一个简单的 `route` 已经实现了
 
-[collectRequestInfo](src/main/scala/http/CollectHttpRequest.scala) 是一个用来收集request log 的函数长成这样,**不感兴趣和直接忽视**
+[collectRequestInfo](src/main/scala/http/CollectHttpRequest.scala) 是一个用来收集request log 的函数长成这样,**不感兴趣可以直接忽视**
 ```scala
 //这个在akka http 中已经定义好了,我们就看看
 type Route = RequestContext ⇒ Future[RouteResult]
@@ -241,11 +241,20 @@ def collectRequestInfo(route: Route): Route = (context: RequestContext) => {
 ```scala
 val http = Http().bindAndHandle(collectRequestInfo(route), "0.0.0.0", 9898)
 ```
-是不是很简单呢
+是不是很简单呢  
+根据传统顺便加个`hello world`
+```scala
+val hello_world = get(path("hello")(complete("hello world")))
+```
+然后把上面的`http = Http(...)`换成:
+```scala
+val http = Http().bindAndHandle(collectRequestInfo(route ~ hello_world), "0.0.0.0", 9898)
+```
+访问下 `http://127.0.0.1:9898/hello`
 
 ### 实现 `ClientActor`
 
-让我们实现`ClientActor` 他将复制逻辑控制,例如出征10就看看任务列表...,不过为了简单还是只实现一个功能就是出征(`war`)
+让我们实现`ClientActor` 它将进行逻辑控制,例如出征10就看看任务列表...,不过为了简单还是只实现一个功能就是出征(`war`)
 ```scala
 class ClientActor() extends Actor {
   val logger         = LoggerFactory.getLogger("client-actor")
@@ -376,7 +385,7 @@ case class Sequence(name: String, actions: Seq[Patten] = Nil){
   def tail = actions.tail
 }
 ```
-定义个`Sequence` 模型,只能线性一个接一个的执行或者重复执行多少次某任务;示例:  
+定义个`Sequence` 模型,只能线性一个接一个的执行;示例:  
 ```
 val a = RecAction(if find pic A then touch it)
 val b = RecAction(if no find pic B then touch it )
