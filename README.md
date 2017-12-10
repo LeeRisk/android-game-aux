@@ -1,4 +1,4 @@
-# android-game-aux
+# 盟新的scala攻略;用scala能做哪些好玩的事-给游戏写辅助
 
 ## 初衷/目的
 - **核心目的: scala 入门教程,给各位盟新一个实例项目,和可以练手的项目(给自己喜欢的手游写辅助)**
@@ -416,7 +416,7 @@ def run(sequence: Sequence)(clientRequest: ClientRequest, sender: ActorRef): Seq
 def execRecAction(recAction: RecAction) = recAction(clientRequest) match {
   //如果失败了,那就失败了
   case Result.Failure(x)   => throw x
-  //如果是Execution,我们会继续执行这个action知道 success为止
+  //如果是Execution,我们会继续执行这个action直到success为止
   //感觉名字叫做`continue` 会更易懂,
   case Result.Execution(x) =>
     sender ! x
@@ -445,7 +445,7 @@ def runBySequence(sequ: Sequence) = {
   else
     Sequence(sequence.name, Patten.Next(result) +: sequence.tail)
 }
-主体
+//主体
 val action = sequence.head
 action match {
   case Next(Action.Rec(action)) => runByRec(action)
@@ -461,7 +461,7 @@ action match {
 例如看下`Images.returns`这张图片  
 ![](images-goal/returns.png)
 
-定义一些辅助方法,我们要找到图片[完整代码](src/main/scala/nyhx/sequence/Find.scala)
+定义一些辅助方法,我们要找的图片[完整代码](src/main/scala/nyhx/sequence/Find.scala)
 ```scala
 object Find{
   val returns           = find(Images.returns.toGoal)
