@@ -37,6 +37,7 @@ object Images {
   }
 
   object Adventure {
+    val needSurvey = image("need-survey.png")
 
     val start             = Images.start
     val adventure         = image("adventure.png")

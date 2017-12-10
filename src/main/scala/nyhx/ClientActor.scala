@@ -2,7 +2,7 @@ package nyhx
 
 import akka.actor.{Actor, ActorRef, FSM, Props}
 import models.{ClientRequest, DismissedTaskFinish, WarTaskEnd}
-import nyhx.sequence.{DismissedActor, WarAreaFiveOneActor, WarAreaThreeOneActor, WarAreaThreeSixActor}
+import nyhx.sequence._
 import org.slf4j.LoggerFactory
 
 object ClientActor {
@@ -25,11 +25,11 @@ class ClientActor() extends Actor with FSM[ClientActor.Status, ClientActor.Data]
 
 
   val logger = LoggerFactory.getLogger("client-actor")
-  val warNum = 1
+  val warNum = 50
 
   def mkDismissed() = context.actorOf(Props(new DismissedActor()))
 
-  def mkWar() = context.actorOf(Props(new WarAreaThreeOneActor(warNum)))
+  def mkWar() = context.actorOf(Props(new WarAreaTwoSix(warNum)))
 
   startWith(War, ActorRefData(mkWar()))
 

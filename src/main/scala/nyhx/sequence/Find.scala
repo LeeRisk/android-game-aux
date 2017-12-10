@@ -50,7 +50,7 @@ class FindAux(f: ClientRequest => FindPicBuild[FindPicBuild.Request]) {
     val name = findPicBuild.goal.get.simpleName
     logger.info(s"wait find $name : (${result.isFind})")
     result match {
-      case IsFindPic(point) => Result.Success()
+      case IsFindPic(point) => Result.Success(Commands().addDelay(100))
       case NoFindPic()      => Result.Execution(Commands())
     }
   }

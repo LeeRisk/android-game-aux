@@ -61,6 +61,17 @@ object Points {
 
     }
 
+    object Two {
+
+      object Six {
+        val b = Point(185, 237)
+        val c = Point(123, 393)
+        val e = Point(330, 369)
+        val f = Point(438, 483)
+      }
+
+    }
+
     val next = Point(914, 306, "next")
   }
 

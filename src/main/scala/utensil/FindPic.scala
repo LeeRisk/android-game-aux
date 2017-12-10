@@ -17,7 +17,21 @@ object FindPicBuild {
   trait Nothing extends Image
 
   type Request = Goal with Original
+
   def apply() = new FindPicBuild[Nothing](None, None)
+
+  def findPic(originalName: String, goalName: String, patten: String) = {
+    val result = PythonScript.eval { jep =>
+      val regex = "\\(([0-9|.]+), ?([0-9]+), ?([0-9]+)\\)".r
+
+      jep.getValue(s"jvm_find_pic('$originalName','$goalName','$patten')") match {
+        case regex(sim, x, y) => (sim.toDouble, x.toInt, y.toInt)
+      }
+    }
+
+    val (max, x, y) = Await.result(result, Duration.Inf)
+    max -> Point(x, y)
+  }
 
   implicit class WithRun[Arr <: Image](findPicBuild: FindPicBuild[Arr])(implicit x: Arr <:< Original with Goal) {
     def run() = {
@@ -25,28 +39,18 @@ object FindPicBuild {
       val goal = findPicBuild.goal.get
       val patten = findPicBuild.patten
       val threshold = findPicBuild.threshold
-      val (similarity, topLeftPoint) = {
-        val originalName = original.name.replaceAll("\\\\", "/")
-        val goalName = goal.name.replaceAll("\\\\", "/")
+      val originalName = original.name.replaceAll("\\\\", "/")
+      val goalName = goal.name.replaceAll("\\\\", "/")
 
-        val result = PythonScript.eval { jep =>
-          val regex = "\\(([0-9|.]+), ?([0-9]+), ?([0-9]+)\\)".r
+      val (similarity, topLeftPoint) = findPic(originalName, goalName, patten.toString)
 
-          jep.getValue(s"jvm_find_pic('$originalName','$goalName','$patten')") match {
-            case regex(sim, x, y) => (sim.toDouble, x.toInt, y.toInt)
-          }
-        }
-
-        val (max, x, y) = Await.result(result, Duration.Inf)
-        max -> Point(x, y)
-      }
-      
       if(similarity > threshold)
-        IsFindPic(topLeftPoint)
+        IsFindPic(topLeftPoint, similarity)
       else
         NoFindPic()
     }
   }
+
   object Patten extends Enumeration {
     val Default = Value("default")
     val Edge    = Value("edge")
@@ -59,10 +63,27 @@ trait FindPicResult {
     case IsFindPic(_) => true
     case NoFindPic()  => false
   }
+
+  def similarity = this match {
+    case x@IsFindPic(_) => x.sim
+    case _              => ???
+  }
+
   def noFind = !isFind
+
+  def point = this match {
+    case IsFindPic(x) => x
+    case _            => ???
+  }
 }
 
-case class IsFindPic(topLeftPoint: Point) extends FindPicResult
+class IsFindPic(val topLeftPoint: Point, val sim: Double) extends FindPicResult
+
+object IsFindPic {
+  def apply(topLeftPoint: Point, sim: Double): IsFindPic = new IsFindPic(topLeftPoint, sim)
+
+  def unapply(arg: IsFindPic): Option[Point] = Some(arg.topLeftPoint)
+}
 
 case class NoFindPic() extends FindPicResult
 

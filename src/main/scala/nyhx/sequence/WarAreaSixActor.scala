@@ -74,13 +74,13 @@ class WarAreaFiveOneActor(warNum: Int) extends Actor
   with ScenesHelper
   with WarHelper {
   val sequences: Sequence =
-//    Sequence("") next randomPoint(Point(275, 235))
-  (Sequence("war")
-    next goToAdventure
-    next goToWarArea(Points.Area.five, 1)
-    repeat(warPoint_f, warNum)
-    next end
-    )
+  //    Sequence("") next randomPoint(Point(275, 235))
+    (Sequence("war")
+      next goToAdventure
+      next goToWarArea(Points.Area.five, 1)
+      repeat(warPoint_f, warNum)
+      next end
+      )
 
   def warPoint_f = (Sequence("warPoint_f")
     next warReady
@@ -99,7 +99,6 @@ class WarAreaFiveOneActor(warNum: Int) extends Actor
     Result.End()
   }
 }
-
 
 
 class WarAreaThreeSixActor(warNum: Int) extends Actor
@@ -130,4 +129,38 @@ class WarAreaThreeSixActor(warNum: Int) extends Actor
     context.parent ! WarTaskEnd(self)
     Result.End()
   }
+}
+
+class WarAreaTwoSix(warNum: Int) extends Actor
+  with ActorHelper
+  with BaseHelper
+  with ScenesHelper
+  with WarHelper {
+  val points              = Points.Adventure.Two
+  val sequences: Sequence =
+  //    Sequence("") next randomPoint(Point(275, 235))
+    (Sequence("war")
+      next goToAdventure
+      next goToWarArea(Points.Area.two, 6)
+      repeat(warPoint_f, warNum)
+      next end
+      )
+
+  def warPoint_f = {
+    (Sequence("warPoint_f")
+      next warReady
+      next warPoint(points.Six.b)
+      next warPoint(points.Six.c)
+      next randomPoint(points.Six.e)
+      next warPoint(points.Six.f)
+      next justDelay(3000)
+      )
+  }
+
+  def end = RecAction { implicit c =>
+    println("WarAreaTwoSix end")
+    context.parent ! WarTaskEnd(self)
+    Result.End()
+  }
+
 }
