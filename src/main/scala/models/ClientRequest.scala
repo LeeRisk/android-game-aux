@@ -1,7 +1,11 @@
 package models
 
+import akka.actor.ActorRef
+import nyhx.sequence.Action
+
 case class ClientRequest(image: Image)
-sealed trait Result {
+
+trait Result {
   def commands: Commands
 }
 
@@ -21,6 +25,10 @@ object Result {
 
   case class Become(f: RecAction, commands: Commands = Commands()) extends Continue
 
+  case class End() extends Result {
+    override def commands: Commands = Commands()
+  }
+
 }
 
 trait RecAction extends (ClientRequest => Result)
@@ -28,3 +36,7 @@ trait RecAction extends (ClientRequest => Result)
 object RecAction {
   def apply(f: ClientRequest => Result): RecAction = (v1: ClientRequest) => f(v1)
 }
+
+case class DismissedTaskFinish(actorRef: ActorRef)
+
+case class WarTaskEnd(actorRef: ActorRef)

@@ -10,6 +10,7 @@ import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 object Find {
   val returns           = find(Images.returns.toGoal)
   val goToRoom          = find(Images.returns_room.toGoal)
+  val goToGakuen        = find(Images.returns_gakuen.toGoal)
   val adventure         = find(Images.Adventure.adventure.toGoal)
   val grouping          = find(Images.Adventure.grouping.toGoal)
   val start             = find(Images.start.toGoal)
@@ -22,6 +23,7 @@ object Find {
     .withGoal(image.toGoal)
     .withOriginal(clientRequest.image.toOriginal)
 
+  def apply(image: GoalImage) = find(image)
 
   implicit def findPicBuilding2FindAux[X <: FindPicBuild.Request](f: ClientRequest => FindPicBuild[X]): FindAux = new FindAux(f)
 }

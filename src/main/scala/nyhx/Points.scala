@@ -18,8 +18,47 @@ object Points {
   }
 
   object Adventure {
-    object AreaSix{
-      val b = Point(353, 194,"b")
+
+    object AreaSix {
+
+      object One {
+        val b = Point(353, 194, "b")
+      }
+
+    }
+
+    object AreaThree {
+
+      object One {
+        val b    = Point(373, 203, "b")
+        val e    = Point(207, 173, "e")
+        val f    = Point(606, 172, "f")
+        val boss = Point(863, 155, "boss")
+      }
+
+    }
+
+    object Five {
+
+      object One {
+        val b = Point(263, 192, "b")
+        val c = Point(137, 396, "g")
+        val d = Point(307, 416, "d")
+        val e = Point(480, 421, "e")
+        val f = Point(680, 438, "f")
+      }
+
+    }
+
+    object Three {
+
+      object Six {
+        val b = Point(131, 242)
+        val c = Point(99, 437)
+        val g = Point(362, 463)
+        val h = Point(599, 441)
+      }
+
     }
 
     val next = Point(914, 306, "next")

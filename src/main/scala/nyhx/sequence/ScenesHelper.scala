@@ -5,7 +5,8 @@ import models._
 import org.slf4j.Logger
 import utensil.{IsFindPic, NoFindPic}
 
-trait Scenes {
+
+trait ScenesHelper {
   def logger: Logger
 
 
@@ -19,6 +20,16 @@ trait Scenes {
       }
   }
 
+  def goToGruen = RecAction { implicit clientRequest =>
+    if(Find.goToRoom(clientRequest).run().isFind)
+      Result.Success()
+    else
+      Find.goToGakuen(clientRequest).run() match {
+        case IsFindPic(point) => Result.Execution(Commands().addTap(point))
+        case NoFindPic()      => Result.Success()
+      }
+  }
+
   def touchReturns = RecAction { implicit clientRequest =>
     val result = Find.returns(clientRequest).run()
     logger.info(s"find return :${result.isFind}")
@@ -27,5 +38,6 @@ trait Scenes {
       case NoFindPic()      => Result.Success()
     }
   }
+
 
 }

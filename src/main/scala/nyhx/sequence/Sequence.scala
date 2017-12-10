@@ -31,7 +31,7 @@ object Patten {
 
   case class Next(action: Action) extends Patten
 
-  case class Util(action: RecAction, num: Int) extends Patten
+  case class Util(action: Action, num: Int) extends Patten
 
   case class Repeat(action: Action, currNum: Int, maxNum: Int) extends Patten
 
@@ -39,17 +39,28 @@ object Patten {
 
 object Sequence {
 
+  case class End(s: String) extends Result {
+    override def commands: Commands = Commands()
+  }
+
   import Patten._
 
   def run(sequence: Sequence)(clientRequest: ClientRequest, sender: ActorRef): Sequence = {
-    def execRecAction(recAction: RecAction) = recAction(clientRequest) match {
-      case Result.Failure(x)   => throw x
-      case Result.Execution(x) =>
+    def execRecAction(recAction: RecAction): Option[Action] = recAction(clientRequest) match {
+      case Result.Failure(x)          => throw x
+      case Result.Execution(x)        =>
         sender ! x
-        Some(recAction)
-      case Result.Success(x)   =>
+        Some(Action.Rec(recAction))
+      case Result.Success(x)          =>
         sender ! x
         None
+      case Result.Become(x, commands) =>
+        sender ! commands
+        Some(x)
+
+      case Result.End() =>
+        sender ! Commands()
+        Some(RecAction { implicit c => Result.Execution(Commands()) })
     }
 
     def runByRec(action: RecAction) = {
@@ -74,8 +85,8 @@ object Sequence {
       case Next(Action.Rec(action)) => runByRec(action)
       case Next(Action.Sequ(sequ))  => runBySequence(sequ)
 
-      case Util(recAction, 0)   => throw new Exception("")
-      case Util(recAction, num) =>
+      case Util(recAction, 0)               => throw new Exception("")
+      case Util(Action.Rec(recAction), num) =>
         execRecAction(recAction) match {
           case Some(x) => Sequence(sequence.name, Patten.Util(x, num - 1) +: sequence.tail)
           case None    => Sequence(sequence.name, sequence.tail)
@@ -85,7 +96,7 @@ object Sequence {
         run(Sequence(sequence.name, sequence.tail))(clientRequest, sender)
       case Repeat(action, currNum, maxNum)                      =>
         logger.info(s"repeat [${action.name}] $currNum/$maxNum ")
-        run(Sequence(sequence.name, Next(action) +: Repeat(action, currNum +1, maxNum) +: sequence.tail))(clientRequest, sender)
+        run(Sequence(sequence.name, Next(action) +: Repeat(action, currNum + 1, maxNum) +: sequence.tail))(clientRequest, sender)
     }
   }
 

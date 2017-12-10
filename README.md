@@ -555,5 +555,5 @@ override def receive: Receive = onRec(sequences)
 ```
 
 ### 结语
- - 相信各位通过此文将能够为自己喜欢的手游写各种辅助了
+ - 相信各位通过此文将能够为自己的手游写各种辅助了
 

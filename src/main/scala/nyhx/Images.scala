@@ -9,6 +9,24 @@ object Images {
   val start          = image("start.png")
   val determine      = image("determine.png")
 
+  object YuanZiWu {
+    val yuanZiWu           = image("yzw.png")
+    val dismissed          = image("yzw-dismissed.png")
+    val selectStudent      = image("yzw-select-student.png")
+    val dismissedDetermine = image("yzw-dismissed-determine.png")
+
+    val dismissedSelectStudentDetermine = image("yzw-dismissed-select-student-determine.png")
+  }
+
+  val lv1 = image("lv1.png")
+
+  object Retrieve {
+    val retrieve = image("retrieve.png")
+    val an       = image("retrieve-an.png")
+    val shui     = image("retrieve-shui.png")
+  }
+
+
   object Area {
     val one   = image("area-one.png")
     val two   = image("area-two.png")
@@ -26,6 +44,7 @@ object Images {
     val totalTurn         = image("adventure-total-turn.png")
     val mpEmpty           = image("adventure-mp-empty.png")
     val navigateCondition = image("adventure-navigate-condition.png")
+    val selectA           = image("select-a.png")
   }
 
   object Wdj {
