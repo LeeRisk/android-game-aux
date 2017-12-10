@@ -1,7 +1,7 @@
 package nyhx.sequence
 
-import models.Commands
-import nyhx.{RecAction, Result}
+
+import models._
 import org.slf4j.Logger
 import utensil.{IsFindPic, NoFindPic}
 

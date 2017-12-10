@@ -4,7 +4,8 @@ import scala.language.implicitConversions
 
 import akka.actor.ActorRef
 import models.ClientRequest
-import nyhx.{RecAction, Result}
+
+import models._
 import org.slf4j.LoggerFactory
 
 trait Action {

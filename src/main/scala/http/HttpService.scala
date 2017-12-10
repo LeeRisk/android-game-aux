@@ -30,25 +30,29 @@ class HttpService {
   val actor: ActorRef = system.actorOf(Props(new ClientActor()))
   implicit val timeout: Timeout = 5.seconds
 
-  val route =
-    post(
-      path(PathMatcher("scala") / "ajjl") {
-        uploadedFile("screen") { case (fileInfo, jfile) =>
-          val file = File("screen.png")
-          File(jfile.getAbsolutePath).copyTo(file, true)
-          val feature = actor
-            .ask(ClientRequest(Image(file.pathAsString))).mapTo[Commands]
-            .map(_.seq.map(_.toJsonString).mkString(";"))
-
-          onComplete(feature) {
-            case Success(x) => complete(x)
-            case Failure(x) =>
-              x.printStackTrace()
-              System.exit(-1)
-              ???
-          }
+  val route = post(
+    // url 路径 为 scala/ajjl
+    path(PathMatcher("scala") / "ajjl") {
+      //接受上传过来的文件
+      uploadedFile("screen") { case (fileInfo, jfile) =>
+        //上传过来的问会被保存到一个临时文件中,将它copy到我们想要的目录
+        val file = File("screen.png")
+        File(jfile.getAbsolutePath).copyTo(file, true)
+        //actor将是需要我们实现的,暂时忽视它
+        //将图片发送给actor,然后将返回的结果转成json
+        val feature = actor
+          .ask(ClientRequest(Image(file.pathAsString))).mapTo[Commands]
+          .map(_.seq.map(_.toJsonString).mkString(";"))
+        //将结果返回client
+        onComplete(feature) {
+          case Success(x) => complete(x)
+          case Failure(x) =>
+            x.printStackTrace()
+            System.exit(-1)
+            ???
         }
-      }) ~ get(path("hello")(complete("hello world")))
+      }
+    }) ~ get(path("hello")(complete("hello world")))
 
   lazy val http = Http().bindAndHandle(collectRequestInfo(route), "0.0.0.0", 9898)
 

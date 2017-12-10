@@ -19,7 +19,7 @@ object FindPicBuild {
   type Request = Goal with Original
   def apply() = new FindPicBuild[Nothing](None, None)
 
-  implicit class WithRun[+Arr <: Image](findPicBuild: FindPicBuild[Arr])(implicit x: Arr <:< Original with Goal) {
+  implicit class WithRun[Arr <: Image](findPicBuild: FindPicBuild[Arr])(implicit x: Arr <:< Original with Goal) {
     def run() = {
       val original = findPicBuild.original.get
       val goal = findPicBuild.goal.get
@@ -47,6 +47,10 @@ object FindPicBuild {
         NoFindPic()
     }
   }
+  object Patten extends Enumeration {
+    val Default = Value("default")
+    val Edge    = Value("edge")
+  }
 
 }
 
@@ -55,6 +59,7 @@ trait FindPicResult {
     case IsFindPic(_) => true
     case NoFindPic()  => false
   }
+  def noFind = !isFind
 }
 
 case class IsFindPic(topLeftPoint: Point) extends FindPicResult
@@ -64,7 +69,7 @@ case class NoFindPic() extends FindPicResult
 class FindPicBuild[+Arr] private(val original: Option[OriginalImage],
                                  val goal: Option[GoalImage],
                                  val threshold: Double = 0.95,
-                                 val patten: FindPic.Patten.Value = FindPic.Patten.Default) {
+                                 val patten: FindPicBuild.Patten.Value = FindPicBuild.Patten.Default) {
 
   def withGoal(goal: GoalImage) =
     new FindPicBuild[Arr with FindPicBuild.Goal](goal = Some(goal), original = original, threshold = threshold, patten = patten)
@@ -81,45 +86,30 @@ class FindPicBuild[+Arr] private(val original: Option[OriginalImage],
 }
 
 
-/////////////////
-/////////////////
-/////////////////
+//case class FindPic(original: OriginalImage,
+//                   goal: GoalImage,
+//                   threshold: Double = 0.95,
+//                   patten: FindPic.Patten.Value = FindPic.Patten.Default) {
+//  lazy val (similarity, topLeftPoint) = {
+//    val originalName = original.name.replaceAll("\\\\", "/")
+//    val goalName = goal.name.replaceAll("\\\\", "/")
+//
+//    val result = PythonScript.eval { jep =>
+//      val regex = "\\(([0-9|.]+), ?([0-9]+), ?([0-9]+)\\)".r
+//
+//      jep.getValue(s"jvm_find_pic('$originalName','$goalName','$patten')") match {
+//        case regex(sim, x, y) => (sim.toDouble, x.toInt, y.toInt)
+//      }
+//    }
+//
+//    val (max, x, y) = Await.result(result, Duration.Inf)
+//    max -> Point(x, y)
+//  }
+//
+//  def point: Option[Point] = if(isFind) Some(topLeftPoint) else None
+//
+//  def isFind: Boolean = similarity >= threshold
+//
+//  def noFind: Boolean = !isFind
+//}
 
-
-case class FindPic(original: OriginalImage,
-                   goal: GoalImage,
-                   threshold: Double = 0.95,
-                   patten: FindPic.Patten.Value = FindPic.Patten.Default) {
-  lazy val (similarity, topLeftPoint) = {
-    val originalName = original.name.replaceAll("\\\\", "/")
-    val goalName = goal.name.replaceAll("\\\\", "/")
-
-    val result = PythonScript.eval { jep =>
-      val regex = "\\(([0-9|.]+), ?([0-9]+), ?([0-9]+)\\)".r
-
-      jep.getValue(s"jvm_find_pic('$originalName','$goalName','$patten')") match {
-        case regex(sim, x, y) => (sim.toDouble, x.toInt, y.toInt)
-      }
-    }
-
-    val (max, x, y) = Await.result(result, Duration.Inf)
-    max -> Point(x, y)
-  }
-
-  def point: Option[Point] = if(isFind) Some(topLeftPoint) else None
-
-  def isFind: Boolean = similarity >= threshold
-
-  def noFind: Boolean = !isFind
-}
-
-
-object FindPic {
-
-  object Patten extends Enumeration {
-    val Default = Value("default")
-    val Edge    = Value("edge")
-  }
-
-
-}

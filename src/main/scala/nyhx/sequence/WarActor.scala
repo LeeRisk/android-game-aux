@@ -2,16 +2,24 @@ package nyhx.sequence
 
 import scala.language.implicitConversions
 
-import akka.actor.{Actor, ActorRef}
-import models.{ClientRequest, Commands, Point}
+import akka.actor.Actor
+import models.{ClientRequest, Commands, Point, _}
 import nyhx._
+import nyhx.sequence.Find.findPicBuilding2FindAux
 import org.slf4j.LoggerFactory
 import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 
-import Find.findPicBuilding2FindAux
-
 class WarActor extends Actor with Scenes {
-  var action = (Sequence("war")
+  def rec(action: Sequence): PartialFunction[Any, Sequence] = PartialFunction { case c: ClientRequest =>
+    Sequence.run(action)(c, sender())
+  }
+
+  def onRec(action: Sequence): Receive =
+    rec(action).andThen(action => context.become(onRec(action)))
+
+  override def receive: Receive = onRec(sequences)
+
+  val sequences: Sequence = (Sequence("war")
     next goToAdventure
     next goToWarArea(Points.Area.six, 4)
     repeat(warPoint_B, 100)
@@ -73,7 +81,6 @@ class WarActor extends Actor with Scenes {
     next Find.determine.waitFind
     next Find.determine.touch
     util(Find.grouping.waitFind, 10)
-
     )
 
 
@@ -133,9 +140,10 @@ class WarActor extends Actor with Scenes {
 
   def end = RecAction { implicit c => println("end"); ??? }
 
-  override def receive: Receive = {
-    case c: ClientRequest =>
-      val result = Sequence.run(action)(c, sender())
-      action = result
-  }
+
+  //  {
+  //    case c: ClientRequest =>
+  //      val result = Sequence.run(action)(c, sender())
+  //      action = result
+  //  }
 }

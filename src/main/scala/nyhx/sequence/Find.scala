@@ -2,8 +2,8 @@ package nyhx.sequence
 
 import scala.language.implicitConversions
 
-import models.{ClientRequest, Commands, GoalImage}
-import nyhx.{Images, NoFindPicException, RecAction, Result}
+import models._
+import nyhx.Images
 import org.slf4j.LoggerFactory
 import utensil.{FindPicBuild, IsFindPic, NoFindPic}
 
@@ -29,6 +29,7 @@ object Find {
 class FindAux(f: ClientRequest => FindPicBuild[FindPicBuild.Request]) {
   val logger = LoggerFactory.getLogger("find-aux")
 
+  //常用的模式之一 if find then touch else ???
   def touch = RecAction { implicit c =>
     val findPicBuild = f(c)
     val result = findPicBuild.run()
@@ -40,6 +41,7 @@ class FindAux(f: ClientRequest => FindPicBuild[FindPicBuild.Request]) {
     }
   }
 
+  //常用的模式之一 if no find then continue else goto next
   def waitFind = RecAction { implicit c =>
     val findPicBuild = f(c)
     val result = findPicBuild.run()

@@ -30,4 +30,3 @@ case class GoalImage(__name: String) extends Image(__name)
 case class OriginalImage(__name: String) extends Image(__name)
 
 
-case class ClientRequest(image: Image)
