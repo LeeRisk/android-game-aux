@@ -54,6 +54,8 @@ copy `curl`(在项目`android/curl`已经准备好了) 到你的手机或模拟�
 ### 实现找图功能
 
 会在scala中通过jep调用此段代码,不感兴趣的小伙伴可以忽视
+可以在jupyter中实验这个功能[see](python-script/FindPic.ipynb)
+
 ```python
 import cv2
 import numpy as np
@@ -252,7 +254,7 @@ val http = Http().bindAndHandle(collectRequestInfo(route ~ hello_world), "0.0.0.
 
 ### 实现 `ClientActor`
 
-让我们实现`ClientActor` 它将进行逻辑控制,例如出征10就看看任务列表...,不过为了简单还是只实现一个功能就是出征(`war`)
+让我们实现[ClientActor](src/main/scala/nyhx/ClientActor.scala)(ps:实际实现使用了`FSM`进行复杂的逻辑控制) 它将进行逻辑控制,例如出征10就看看任务列表...,不过为了简单还是只实现一个功能就是出征(`war`)
 ```scala
 class ClientActor() extends Actor {
   val logger         = LoggerFactory.getLogger("client-actor")
@@ -528,7 +530,7 @@ so easy;来做更多
 终于完成了:::
 
 最后一步`receive`
-```
+```scala
   var sequences = Sequence() next gotoAdventure next warPoint_b 
 
   override def receive: Receive = {
