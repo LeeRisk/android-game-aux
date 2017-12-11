@@ -28,7 +28,7 @@ trait WarHelper {
   // tap grouping
   // check mp
   // tap start
-  def warReady = (Sequence("warReady")
+  def warReady(implicit context: ActorContext) = (Sequence("warReady")
     next Find.grouping.touch
     next checkMpEmpty
     next Find.start.touch

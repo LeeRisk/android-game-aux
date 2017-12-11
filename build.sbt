@@ -14,3 +14,5 @@ libraryDependencies ++= (Nil
   ++ Libs.scalaTest.map(_ % Test)
   ++ Libs.jep
   )
+
+enablePlugins(PackPlugin)
