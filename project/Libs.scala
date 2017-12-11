@@ -1,7 +1,7 @@
 import sbt._
 
 object Libs {
-  val akkaVersion     = "2.5.2"
+  val akkaVersion     = "2.5.8"
   val akkaHttpVersion = "10.0.9"
   val sparkVersion    = "2.2.0"
   val jacksonVersion  = "2.9.0"
@@ -81,8 +81,9 @@ object Libs {
     val remote  = Seq("com.typesafe.akka" %% "akka-remote" % akkaVersion)
     val slf4j   = Seq("com.typesafe.akka" %% "akka-slf4j" % akkaVersion)
     val testkit = Seq("com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test)
+    val typed   = Seq("com.typesafe.akka" %% "akka-typed" % akkaVersion)
 
-    val actors = actor ++ remote ++ slf4j ++ testkit
+    val actors = actor ++ remote ++ slf4j ++ testkit ++ typed
   }
 
   object akkaHttp {
