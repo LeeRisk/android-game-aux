@@ -6,7 +6,7 @@ import models._
 import nyhx.{Images, Points}
 import utensil.{IsFindPic, NoFindPic}
 import Find.findPicBuilding2FindAux
-import akka.actor.Actor
+import akka.actor.{Actor, ActorContext}
 
 trait WarHelper {
   this: ScenesHelper with BaseHelper =>
@@ -32,19 +32,19 @@ trait WarHelper {
     next Find.grouping.touch
     next checkMpEmpty
     next Find.start.touch
-    //    next checkWarIsStart
+    next checkWarIsStart
     )
 
-  //  def checkWarIsStart = RecAction { implicit c =>
-  //    Find.start(c).run() match {
-  //      case IsFindPic(point) =>
-  //        println("start war failure")
-  //        context.parent ! WarTaskEnd(self)
-  //        Result.Failure(WarStartFailure())
-  //      case NoFindPic()      =>
-  //        Result.Success()
-  //    }
-  //  }
+  def checkWarIsStart(implicit context: ActorContext) = RecAction { implicit c =>
+    Find.start(c).run() match {
+      case IsFindPic(point) =>
+        println("start war failure")
+        context.parent ! WarTaskEnd(context.self)
+        Result.End()
+      case NoFindPic()      =>
+        Result.Success()
+    }
+  }
 
 
   // tap point

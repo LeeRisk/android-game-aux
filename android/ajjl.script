@@ -4,7 +4,7 @@ While True
 
     //    Dim result = ShanHai.execute("/sdcard/curl http://192.168.1.100:9898/ajjl/action")
     SnapShot "/sdcard/screen.png"
-    dim result =ShanHai.execute ("/sdcard/curl -F 'screen=@/sdcard/screen.png' http://192.168.1.100:9898/scala/ajjl")
+    dim result =ShanHai.execute ("/sdcard/curl -F 'screen=@/sdcard/screen.png' http://10.30.10.226:9898/scala/ajjl")
     Dim delay_time = 1000
 
     If not (trim(result) = "") Then
