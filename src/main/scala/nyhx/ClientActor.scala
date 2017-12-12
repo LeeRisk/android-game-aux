@@ -21,7 +21,7 @@ object ClientActor {
 
 import ClientActor._
 
-class ClientActor() extends Actor with FSM[ClientActor.Status, ClientActor.Data] {
+class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, ClientActor.Data] {
 
 
   val logger = LoggerFactory.getLogger("client-actor")
@@ -29,7 +29,13 @@ class ClientActor() extends Actor with FSM[ClientActor.Status, ClientActor.Data]
 
   def mkDismissed() = context.actorOf(Props(new DismissedActor()))
 
-  def mkWar() = context.actorOf(Props(new WarAreaTwoSix(warNum)))
+  def mkWar() =
+    if(args.contains("war-2-6"))
+      context.actorOf(Props(new WarAreaTwoSix(warNum)))
+    else if(args.contains("war-6-1"))
+      context.actorOf(Props(new WarAreaSixActor()))
+    else
+      context.actorOf(Props(new WarAreaTwoSix(warNum)))
 
   startWith(War, ActorRefData(mkWar()))
 

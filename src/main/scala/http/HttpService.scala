@@ -20,14 +20,14 @@ import org.slf4j.LoggerFactory
 
 import CollectRequestInfo.collectRequestInfo
 
-class HttpService {
+class HttpService(args:Seq[String]) {
   implicit val system          : ActorSystem              = ActorSystem()
   implicit val materializer    : ActorMaterializer        = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   val logger = LoggerFactory.getLogger("http-service")
   logger.info("start")
-  val actor: ActorRef = system.actorOf(Props(new ClientActor()))
+  val actor: ActorRef = system.actorOf(Props(new ClientActor(args)))
   implicit val timeout: Timeout = 5.seconds
 
   val route = post(
@@ -63,7 +63,8 @@ class HttpService {
 
 object HttpService {
   def main(args: Array[String]): Unit = {
-    val httpService = new HttpService
+
+    val httpService = new HttpService(args.toList)
     httpService.http
   }
 }
