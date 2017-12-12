@@ -12,7 +12,7 @@ object PythonScript {
   val userDir = System.getProperty("user.dir")
   libpath = s"${userDir}\\python-script;${libpath}"
   System.setProperty("java.library.path", libpath)
-  println(System.getProperty("java.library.path"))
+//  println(System.getProperty("java.library.path"))
   implicit private val _exec: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
 
 
