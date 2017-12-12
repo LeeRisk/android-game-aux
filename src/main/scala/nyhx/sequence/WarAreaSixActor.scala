@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 import akka.actor.Actor
 import models._
 import nyhx._
-import Find.findPicBuilding2FindAux
+import FindAux.findPicBuilding2FindAux
 import utensil.{IsFindPic, NoFindPic}
 
 class WarAreaSixActor

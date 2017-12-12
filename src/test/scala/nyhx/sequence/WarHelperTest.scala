@@ -13,7 +13,7 @@ class WarHelperTest extends WordSpec with ImageSources {
   }
   "find" in {
     val c = ClientRequest(readOriginal("random-survey.png"))
-    assert(Find(Images.Adventure.needSurvey.toGoal)(c).run().isFind)
+    assert(FindAux(Images.Adventure.needSurvey.toGoal)(c).run().isFind)
   }
   "find 2" in {
     //    val c = ClientRequest(readOriginal("random-survey-2.png"))

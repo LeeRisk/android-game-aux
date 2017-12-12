@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 import akka.actor.Actor
 import models._
 import nyhx.Images
-import nyhx.sequence.Find.findPicBuilding2FindAux
+import nyhx.sequence.FindAux.findPicBuilding2FindAux
 import utensil.{IsFindPic, NoFindPic}
 
 class DismissedActor extends Actor
@@ -15,21 +15,21 @@ class DismissedActor extends Actor
   val sequences = (Sequence("dismissed")
     next touchReturns
     next goToGruen
-    next Find(Images.YuanZiWu.yuanZiWu.toGoal).touch
+    next FindAux(Images.YuanZiWu.yuanZiWu.toGoal).touch
     next justDelay(1000)
-    next Find(Images.YuanZiWu.dismissed.toGoal).touch
+    next FindAux(Images.YuanZiWu.dismissed.toGoal).touch
     repeat(execDismissed, 10)
     )
 
   def execDismissed: Sequence = (Sequence("exec dismissed")
-    next Find(Images.YuanZiWu.selectStudent.toGoal).touch
-    next Find(Images.Retrieve.retrieve.toGoal).touch
-    next Find(Images.Retrieve.an.toGoal).touch
-    next Find(Images.Retrieve.shui.toGoal).touch
+    next FindAux(Images.YuanZiWu.selectStudent.toGoal).touch
+    next FindAux(Images.Retrieve.retrieve.toGoal).touch
+    next FindAux(Images.Retrieve.an.toGoal).touch
+    next FindAux(Images.Retrieve.shui.toGoal).touch
     next justTap(Point(1, 1), 1000)
     next selectStudent
     next checkNeedDismissed
-    next Find(Images.YuanZiWu.dismissedDetermine.toGoal).touch
+    next FindAux(Images.YuanZiWu.dismissedDetermine.toGoal).touch
     next justTap(Point(1, 1), 1000)
     )
 
@@ -38,7 +38,7 @@ class DismissedActor extends Actor
     val commands = points.foldLeft(Commands())((l, r) =>
       l.addTap(r).addDelay(200)
     )
-    val result = Find(Images.lv1.toGoal)(c).run()
+    val result = FindAux(Images.lv1.toGoal)(c).run()
     if(result.noFind)
       Result.Success()
     else {
@@ -47,7 +47,7 @@ class DismissedActor extends Actor
   }
 
   def checkNeedDismissed = RecAction { implicit c =>
-    val result = Find(Images.YuanZiWu.dismissedSelectStudentDetermine.toGoal)(c).run()
+    val result = FindAux(Images.YuanZiWu.dismissedSelectStudentDetermine.toGoal)(c).run()
     result match {
       case IsFindPic(point) =>
         Result.Success(Commands().addTap(point))

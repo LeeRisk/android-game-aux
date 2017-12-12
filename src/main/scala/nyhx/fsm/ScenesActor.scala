@@ -1,13 +1,11 @@
 package nyhx.fsm
 
-import akka.actor.{Actor, ActorRef, FSM, LoggingFSM, Props}
+import akka.actor.{Actor, ActorRef, FSM, Props}
 import models.{ClientRequest, Commands, NoFindPicException}
-import nyhx.Images
-import nyhx.sequence.Find
-import utensil.{IsFindPic, NoFindPic}
-import nyhx.sequence.Find.findPicBuildingWithRun
+import nyhx.{Find, Images}
+import nyhx.Find.FindPicBuildingWithRun
 import org.slf4j.LoggerFactory
-import nyhx.fsm.ScenesStatus._
+import utensil.{IsFindPic, NoFindPic}
 
 //class ReturnsActor extends Actor {
 //  override def receive: Receive = {
@@ -22,25 +20,45 @@ import nyhx.fsm.ScenesStatus._
 //  }
 //}
 
-object ScenesMoveActor {
-  def apply(seq: ScenesStatus*): Props = Props(new ScenesMoveActor(seq))
+
+//object ScenesMoveActor {
+//  def apply(seq: ScenesStatus*): Props = Props(new ScenesMoveActor(seq))
+//}
+//
+//class ScenesMoveActor(seq: Seq[ScenesStatus]) extends Actor {
+//  private var workActorList = seq.map(e => context.actorOf(Props(new ScenesActor(e))))
+//
+//  override def receive: Receive = {
+//    case c: ClientRequest => workActorList.head forward c
+//    case TaskFinish       =>
+//      context.stop(workActorList.head)
+//      workActorList = workActorList.tail
+//      if(workActorList.isEmpty) context.parent ! TaskFinish
+//
+//  }
+//}
+//
+object ScenesActor {
+
+  trait Status
+
+  object Returns extends Status
+
+  object GotoRoom extends Status
+
+  object Failure extends Status
+
+  object Finish extends Status
+
+
+  def returns = Props(new ScenesActor(Returns))
+
+  def gotoRoom = Props(new ScenesActor(GotoRoom))
 }
 
-class ScenesMoveActor(seq: Seq[ScenesStatus]) extends Actor {
-  private var workActorList = seq.map(e => context.actorOf(Props(new ScenesActor(e))))
+import nyhx.fsm.ScenesActor._
 
-  override def receive: Receive = {
-    case c: ClientRequest => workActorList.head forward c
-    case TaskFinish       =>
-      context.stop(workActorList.head)
-      workActorList = workActorList.tail
-      if(workActorList.isEmpty) context.parent ! TaskFinish
-
-  }
-}
-
-
-class ScenesActor(goal: ScenesStatus) extends Actor with FSM[ScenesStatus, BaseData] {
+class ScenesActor(goal: Status) extends Actor with FSM[Status, BaseData] {
   val regulator: ActorRef = context.parent
 
   startWith(goal, UnInit)
@@ -65,14 +83,6 @@ class ScenesActor(goal: ScenesStatus) extends Actor with FSM[ScenesStatus, BaseD
       }
   }
 
-  when(GotoWdj) {
-    case Event(c: ClientRequest, _) =>
-      val wdj = Find(Images.Wdj.wuDouJi).run(c)
-      wdj match {
-        case IsFindPic(point) => goto(Finish).replying(Commands().addTap(point))
-        case NoFindPic()      => goto(Failure).replying(Commands())
-      }
-  }
 
   when(Failure) {
     case Event(_, _) =>

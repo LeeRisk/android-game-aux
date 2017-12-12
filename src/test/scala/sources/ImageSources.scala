@@ -7,7 +7,7 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 
 trait AkkaSources extends BeforeAndAfterAll {
   this: Suite =>
-  implicit lazy val actorSystem = ActorSystem("test")
+  lazy          val actorSystem = ActorSystem("test")
   lazy          val testkit     = new TestKit(actorSystem) with akka.testkit.ImplicitSender
   implicit lazy val exec        = actorSystem.dispatcher
 

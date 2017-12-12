@@ -1,7 +1,8 @@
 package nyhx
 
 import akka.actor.{Actor, ActorRef, FSM, Props}
-import models.{ClientRequest, DismissedTaskFinish, WarTaskEnd}
+import models.ClientRequest
+import nyhx.fsm.WdjActor
 import nyhx.sequence._
 import org.slf4j.LoggerFactory
 
@@ -19,7 +20,7 @@ object ClientActor {
 
 }
 
-import ClientActor._
+import nyhx.ClientActor._
 
 class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, ClientActor.Data] {
 
@@ -35,7 +36,8 @@ class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, 
     else if(args.contains("war-6-1"))
       context.actorOf(Props(new WarAreaSixActor()))
     else
-      context.actorOf(Props(new WarAreaTwoSix(warNum)))
+      context.actorOf(Props(new WdjActor()))
+//      context.actorOf(Props(new WarAreaTwoSix(warNum)))
 
   startWith(War, ActorRefData(mkWar()))
 

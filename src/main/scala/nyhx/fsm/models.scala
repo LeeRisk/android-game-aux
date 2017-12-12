@@ -8,25 +8,11 @@ case object TaskFinish
 case class TaskFailure(exception: Exception)
 
 
-trait BaseStatus
+trait BaseStatus {
+  def statusToString(s: AnyRef) = s.getClass.getName.replace("$", ".")
 
-trait ScenesStatus extends BaseStatus
-
-
-object ScenesStatus {
-
-  object Returns extends ScenesStatus
-
-  object GotoRoom extends ScenesStatus
-
-  object GotoWdj extends ScenesStatus
-
-  object Failure extends ScenesStatus
-
-  object Finish extends ScenesStatus
-
+  override def toString: String = statusToString(this)
 }
-
 
 trait BaseData
 
@@ -34,4 +20,7 @@ object UnInit extends BaseData
 
 object NoData extends BaseData
 
-case class WorkActor(actorRef: ActorRef) extends BaseData
+//case class WorkActor(actorRef: ActorRef) extends BaseData
+
+case class WorkActorList(actorRef: List[ActorRef]) extends BaseData
+

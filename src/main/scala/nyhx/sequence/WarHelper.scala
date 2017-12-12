@@ -2,11 +2,11 @@ package nyhx.sequence
 
 import java.util.UUID
 
+import akka.actor.ActorContext
 import models._
+import nyhx.sequence.FindAux.findPicBuilding2FindAux
 import nyhx.{Images, Points}
 import utensil.{IsFindPic, NoFindPic}
-import Find.findPicBuilding2FindAux
-import akka.actor.{Actor, ActorContext}
 
 trait WarHelper {
   this: ScenesHelper with BaseHelper =>
@@ -20,23 +20,23 @@ trait WarHelper {
   def goToAdventure = (Sequence("goToAdventure")
     next touchReturns
     next goToRoom
-    next mustFind(Find.adventure(_))
-    next Find.adventure.touch
-    util(Find.grouping.waitFind, 10)
+    next mustFind(FindAux.adventure(_))
+    next FindAux.adventure.touch
+    util(FindAux.grouping.waitFind, 10)
     )
 
   // tap grouping
   // check mp
   // tap start
   def warReady(implicit context: ActorContext) = (Sequence("warReady")
-    next Find.grouping.touch
+    next FindAux.grouping.touch
     next checkMpEmpty
-    next Find.start.touch
+    next FindAux.start.touch
     next checkWarIsStart
     )
 
   def checkWarIsStart(implicit context: ActorContext) = RecAction { implicit c =>
-    Find.start(c).run() match {
+    FindAux.start(c).run() match {
       case IsFindPic(point) =>
         println("start war failure")
         context.parent ! WarTaskEnd(context.self)
@@ -52,28 +52,28 @@ trait WarHelper {
   // wait war end
   // sure reward
   def warPoint(point: Point) = (Sequence("warPoint")
-    next Find.navigateCondition.waitFind
+    next FindAux.navigateCondition.waitFind
     next justTap(point, 2000)
-    next Find.start.waitFind
-    next Find.start.touch
+    next FindAux.start.waitFind
+    next FindAux.start.touch
     next waitWarEnd
     next sureWarReward
     )
 
   def randomPoint(point: Point) = (Sequence(s"random point :${point.name}")
-    next Find.navigateCondition.waitFind
+    next FindAux.navigateCondition.waitFind
     next justTap(point, 2000)
     next screenSave
-    next Find(Images.Adventure.selectA.toGoal).waitFind
+    next FindAux(Images.Adventure.selectA.toGoal).waitFind
     next randomSelect
     next justTap(Point(1, 1), 500)
     next justTap(Point(1, 1), 500)
     )
 
   def randomSelect = RecAction { implicit c =>
-    val a = Find(Images.Adventure.needSurvey.toGoal).andThen(_.withThreshold(0.93))(c).run()
+    val a = FindAux(Images.Adventure.needSurvey.toGoal).andThen(_.withThreshold(0.93))(c).run()
     println(a.isFind)
-    val backup = Find(Images.Adventure.selectA.toGoal).touch
+    val backup = FindAux(Images.Adventure.selectA.toGoal).touch
     if(a.isFind) Result.Success(Commands().addTap(a.point))
     else backup(c)
   }
@@ -87,14 +87,14 @@ trait WarHelper {
   }
 
   def warEnd = (Sequence("warEnd")
-    next Find.returns.waitFind
-    next Find.returns.touch
-    next Find.determine.waitFind
-    next Find.determine.touch
-    util(Find.grouping.waitFind, 10)
+    next FindAux.returns.waitFind
+    next FindAux.returns.touch
+    next FindAux.determine.waitFind
+    next FindAux.determine.touch
+    util(FindAux.grouping.waitFind, 10)
     )
 
-  def waitWarEnd = Find.totalTurn.waitFind
+  def waitWarEnd = FindAux.totalTurn.waitFind
 
   def goToWarArea(area: Point, zone: Int) = RecAction { implicit c =>
     val toArea = Commands()
@@ -106,7 +106,7 @@ trait WarHelper {
   }
 
   def checkMpEmpty = RecAction { implicit c =>
-    val result = Find.mpEmpty(c).run()
+    val result = FindAux.mpEmpty(c).run()
     result match {
       case IsFindPic(point) =>
         logger.warn("mp empty in war;")
@@ -118,7 +118,7 @@ trait WarHelper {
   }
 
   def sureWarReward = RecAction { implicit c =>
-    val result = Find.returns(c).run()
+    val result = FindAux.returns(c).run()
 
     result match {
       case IsFindPic(point) =>

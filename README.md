@@ -461,7 +461,7 @@ action match {
 例如看下`Images.returns`这张图片  
 ![](images-goal/returns.png)
 
-定义一些辅助方法,我们要找的图片[完整代码](src/main/scala/nyhx/sequence/Find.scala)
+定义一些辅助方法,我们要找的图片[完整代码](src/main/scala/nyhx/sequence/FindAux.scala)
 ```scala
 object Find{
   val returns           = find(Images.returns.toGoal)
