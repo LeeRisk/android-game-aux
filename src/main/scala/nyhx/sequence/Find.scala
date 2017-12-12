@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 import models._
 import nyhx.Images
 import org.slf4j.LoggerFactory
-import utensil.{FindPicBuild, IsFindPic, NoFindPic}
+import utensil.{FindPicBuild, FindPicResult, IsFindPic, NoFindPic}
 
 object Find {
   val returns           = find(Images.returns.toGoal)
@@ -23,9 +23,13 @@ object Find {
     .withGoal(image.toGoal)
     .withOriginal(clientRequest.image.toOriginal)
 
-  def apply(image: GoalImage) = find(image)
+  def apply(image: Image) = find(image.toGoal)
 
   implicit def findPicBuilding2FindAux[X <: FindPicBuild.Request](f: ClientRequest => FindPicBuild[X]): FindAux = new FindAux(f)
+
+  implicit def findPicBuildingWithRun[X <: FindPicBuild.Request](f: ClientRequest => FindPicBuild[X]) = new {
+    def run(c: ClientRequest): FindPicResult = f(c).run()
+  }
 }
 
 class FindAux(f: ClientRequest => FindPicBuild[FindPicBuild.Request]) {
