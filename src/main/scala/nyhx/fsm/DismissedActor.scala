@@ -71,7 +71,8 @@ class DismissedActor extends FSM[Status, Data]
   )
 
   def dismissedDetermineActor() = List(
-    context actorOf FindActor.touch(Find(Images.YuanZiWu.dismissedDetermine))
+    context actorOf FindActor.touch(Find(Images.YuanZiWu.dismissedDetermine)),
+    context actorOf JustActor.justTap(Point(1, 1))
   )
 
   startWith(Move, WorkActorList(moveActors()))
@@ -83,7 +84,7 @@ class DismissedActor extends FSM[Status, Data]
       if(result.isFind)
         goto(DetermineDetermine)
           .using(WorkActorList(dismissedDetermineActor()))
-          .replying(Commands().tap(result.point).delay(1000).tap(Point(1,1)).delay(1000))
+          .replying(Commands())
       else
         goto(Finish).replying(Commands())
   }
