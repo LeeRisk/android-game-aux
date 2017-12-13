@@ -2,16 +2,16 @@ package utensil
 
 import nyhx.Images
 import org.scalatest._
-import sources.ImageSources
+import sources.ImageTestSources
 
-class FindPicBuildTest extends WordSpec with Matchers with ImageSources {
-  val original = readOriginal("room.png")
+class FindPicBuildTest extends WordSpec with Matchers with ImageTestSources {
+  val room = readOriginal("room.png")
   "wdj" must {
     "wdj" in {
       val goal = Images.Wdj.wuDouJi.toGoal
       val result = FindPicBuild()
         .withGoal(goal)
-        .withOriginal(original)
+        .withOriginal(room)
         .run()
       assert(result.isFind)
     }
@@ -19,7 +19,7 @@ class FindPicBuildTest extends WordSpec with Matchers with ImageSources {
       val goal = Images.Wdj.wuDouJi.toGoal
       val result = FindPicBuild()
         .withGoal(goal)
-        .withOriginal(original)
+        .withOriginal(room)
         .run()
       assert(result.isFind)
     }
@@ -27,7 +27,7 @@ class FindPicBuildTest extends WordSpec with Matchers with ImageSources {
       val goal = Images.Wdj.shenShen.toGoal
       val result = FindPicBuild()
         .withGoal(goal)
-        .withOriginal(original)
+        .withOriginal(room)
         .run()
       assert(result.noFind)
     }

@@ -2,7 +2,7 @@ package nyhx
 
 import akka.actor.{Actor, ActorRef, FSM, Props}
 import models.ClientRequest
-import nyhx.fsm.WdjActor
+import nyhx.fsm.{TaskFinish, WdjActor}
 import nyhx.sequence._
 import org.slf4j.LoggerFactory
 
@@ -33,13 +33,24 @@ class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, 
 
   def contains(s: String) = args.contains(s.trim)
 
-  def startStatus() = {
-    /**/ if(contains("war-2-6")) startWith(War, WorkActor(actorOf(Props(new WarAreaTwoSix(warNum)))))
-    else if(contains("war-6-4")) startWith(War, WorkActor(actorOf(Props(new WarAreaSixActor()))))
-    else if(contains("wdj    ")) startWith(War, WorkActor(actorOf(Props(new WdjActor(warNum)))))
+  def statusMap() = {
+    val map = Map[Status, () => Data](
+      //default value
+      (War -> (() => WorkActor(actorOf(Props(new WarAreaSixActor()))))),
+      (Dismissed -> (() => WorkActor(actorOf(Props(new nyhx.fsm.DismissedActor)))))
+    )
+
+    args.foldLeft(map) {
+      case (acc, "war-2-6") => map + (War -> (() => WorkActor(actorOf(Props(new WarAreaTwoSix(warNum))))))
+      case (acc, "war-6-4") => map + (War -> (() => WorkActor(actorOf(Props(new WarAreaSixActor())))))
+      case (acc, "wdj")     => map + (War -> (() => WorkActor(actorOf(Props(new WdjActor(warNum))))))
+      case (acc, "dismiss") => map + (Dismissed -> (() => WorkActor(actorOf(Props(new nyhx.fsm.DismissedActor)))))
+      case _                => map
+    }
   }
 
-  startStatus()
+  val map = statusMap()
+  startWith(War, map(War)())
   when(War) {
     case Event(x: ClientRequest, WorkActor(actorRef)) =>
       actorRef forward x
@@ -47,17 +58,16 @@ class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, 
     case Event(WarTaskEnd(_), WorkActor(actorRef))    =>
       logger.info("war finish go to dismissed")
       context.stop(actorRef)
-      goto(Dismissed) using WorkActor(mkDismissed())
+      goto(Dismissed) using map(Dismissed)()
   }
 
   when(Dismissed) {
-    case Event(x: ClientRequest, WorkActor(actorRef))       =>
+    case Event(x: ClientRequest, WorkActor(actorRef)) =>
       actorRef forward x
       stay()
-    case Event(DismissedTaskFinish(_), WorkActor(actorRef)) =>
+    case Event(TaskFinish, WorkActor(actorRef))       =>
       logger.info("dismissed finish go to war")
       context.stop(actorRef)
-      stay()
-//      goto(War) using WorkActor(mkWar())
+      goto(War).using(map(War)())
   }
 }

@@ -5,7 +5,7 @@ import akka.testkit.TestKit
 import models.{GoalImage, OriginalImage}
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
-trait AkkaSources extends BeforeAndAfterAll {
+trait AkkaTestSources extends BeforeAndAfterAll {
   this: Suite =>
   lazy          val actorSystem = ActorSystem("test")
   lazy          val testkit     = new TestKit(actorSystem) with akka.testkit.ImplicitSender
@@ -24,10 +24,18 @@ trait AkkaSources extends BeforeAndAfterAll {
 
 }
 
-trait ImageSources {
+trait ImageTestSources {
   val userDir = System.getProperty("user.dir").replaceAll("\\\\", "/")
 
   def readOriginal(name: String) = OriginalImage(s"$userDir/images-original/$name")
 
   def readGoal(name: String) = GoalImage(s"$userDir/images-goal/$name")
+
+  object original {
+    val adventure              = readOriginal("adventure.png")
+    val room                   = readOriginal("room.png")
+    val studentSelect          = readOriginal("student-select.png")
+    val studentSelectDetermine = readOriginal("student-select-determine.png")
+  }
+
 }

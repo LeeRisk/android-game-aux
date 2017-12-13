@@ -21,9 +21,10 @@ object Images {
   val lv1 = image("lv1.png")
 
   object Retrieve {
-    val retrieve = image("retrieve.png")
-    val an       = image("retrieve-an.png")
-    val shui     = image("retrieve-shui.png")
+    val retrieve   = image("retrieve.png")
+    val an         = image("retrieve-an.png")
+    val shui       = image("retrieve-shui.png")
+    val attributes = image("retrieve-attributes.png")
   }
 
 

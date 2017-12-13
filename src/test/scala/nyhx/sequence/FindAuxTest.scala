@@ -2,10 +2,10 @@ package nyhx.sequence
 
 import models.{ClientRequest, Commands}
 import org.scalatest._
-import sources.ImageSources
+import sources.ImageTestSources
 import FindAux.findPicBuilding2FindAux
 
-class FindAuxTest extends WordSpec with Matchers with ImageSources {
+class FindAuxTest extends WordSpec with Matchers with ImageTestSources {
   "returns" in {
     val result = FindAux.returns(ClientRequest(readOriginal("adventure.png"))).run()
     assert(result.isFind)

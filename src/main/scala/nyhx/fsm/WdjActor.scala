@@ -1,6 +1,6 @@
 package nyhx.fsm
 
-import akka.actor.{Actor, ActorContext, ActorRef, FSM, Props}
+import akka.actor.{Actor, ActorRef, FSM, Props}
 import models.{ClientRequest, Commands, Point}
 import nyhx.{Find, Images}
 import org.slf4j.LoggerFactory
@@ -31,7 +31,9 @@ object WdjActor {
 
 import nyhx.fsm.WdjActor._
 
-class WdjWarActor extends FSM[Status, Data] {
+
+class WdjWarActor extends FSM[Status, Data]
+    with FsmHelper[Status, Data] {
 
   import context.actorOf
 
@@ -45,17 +47,6 @@ class WdjWarActor extends FSM[Status, Data] {
     actorOf(FindActor.waitFind(FindActor.IsFind, Find(Images.Wdj.fightResult)))
   )
 
-  def work(nextState: State): StateFunction = {
-    case Event(c: ClientRequest, WorkActorList(list)) =>
-      list.head forward c
-      stay()
-    case Event(TaskFinish, x@WorkActorList(list))     =>
-      context.stop(list.head)
-      if(list.tail.isEmpty)
-        nextState
-      else
-        stay().using(WorkActorList(list.tail))
-  }
 
   startWith(StartWar, WorkActorList(startWar))
   when(StartWar)(work(nextState = goto(WaitWarEnd).using(WorkActorList(waitWarEnd))))
@@ -73,13 +64,16 @@ class WdjWarActor extends FSM[Status, Data] {
       }
   }
   when(Finish) { case _ => logger.info("finish"); stay() }
+
+  implicit def workActorListData(workActorList: WorkActorList): Data = workActorList
 }
 
-class WdjActor(totalWarNum: Int = 10) extends Actor with FSM[Status, Data] {
+class WdjActor(totalWarNum: Int = 10) extends FSM[Status, Data]
+    with FsmHelper[Status, Data] {
 
   import context.actorOf
 
-  def moveActors = List(
+  def moveActors() = List(
     actorOf(ScenesActor.returns),
     actorOf(ScenesActor.gotoRoom),
     actorOf(FindActor.touch(Find(Images.Wdj.wuDouJi))),
@@ -87,17 +81,21 @@ class WdjActor(totalWarNum: Int = 10) extends Actor with FSM[Status, Data] {
     actorOf(FindActor.touch(Find(Images.Wdj.shenShen))),
   )
 
+  def warActor() = actorOf(Props(new WdjWarActor))
 
-  startWith(Move, WorkActorList(moveActors))
-  when(Move)(work(nextState = goto(War).using(WarNum(0, actorOf(Props(new WdjWarActor))))))
+
+  startWith(Move, WorkActorList(moveActors()))
+  when(Move)(work(nextState = goto(War).using(WarNum(0, warActor()))))
   when(War) {
-    case Event(c: ClientRequest, WarNum(i, actorRef))              =>
+    case Event(c: ClientRequest, WarNum(i, actorRef))               =>
       actorRef forward c
       stay()
-    case Event(TaskFinish, WarNum(i, actorRef)) if i < totalWarNum =>
+    case Event(TaskFinish, WarNum(i, actorRef)) if i < totalWarNum  =>
       logger.info(s"$i/$totalWarNum - end")
-      goto(War).using(WarNum(i + 1, actorOf(Props(new WdjWarActor))))
-    case Event(TaskFinish, WarNum(i, actorRef)) if i < totalWarNum =>
+      context.stop(actorRef)
+      goto(War).using(WarNum(i + 1, warActor()))
+    case Event(TaskFinish, WarNum(i, actorRef)) if i >= totalWarNum =>
+      context.stop(actorRef)
       goto(Finish)
 
   }
@@ -108,21 +106,4 @@ class WdjActor(totalWarNum: Int = 10) extends Actor with FSM[Status, Data] {
 
 
   val logger = LoggerFactory.getLogger("wdj")
-
-  def work(nextState: State): StateFunction = {
-    case Event(c: ClientRequest, WorkActorList(list)) =>
-      list.head forward c
-      stay()
-    case Event(TaskFinish, x@WorkActorList(list))     =>
-      context.stop(list.head)
-      if(list.tail.isEmpty)
-        nextState
-      else
-        stay().using(WorkActorList(list.tail))
-  }
-
-  onTransition {
-    case f -> t =>
-      logger.debug(s"status:${(f)} -> ${(t)}")
-  }
 }

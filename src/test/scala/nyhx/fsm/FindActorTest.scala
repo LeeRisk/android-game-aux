@@ -4,15 +4,12 @@ import akka.testkit.{TestActorRef, TestProbe}
 import models.{ClientRequest, Commands, TapCommand}
 import nyhx.{Find, Images}
 import org.scalatest._
-import sources.{AkkaSources, ImageSources}
+import sources.{AkkaTestSources, ImageTestSources}
 
-class FindActorTest extends WordSpec with ImageSources with AkkaSources with Matchers {
+class FindActorTest extends WordSpec with ImageTestSources with AkkaTestSources with Matchers {
 
   import testkit._
 
-  object original {
-    val adventure = readOriginal("adventure.png")
-  }
 
   "touch" in {
     val parent = TestProbe()

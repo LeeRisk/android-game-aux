@@ -4,9 +4,10 @@ import akka.actor.{Actor, Props}
 import akka.testkit.TestActorRef
 import nyhx.sequence.{DismissedTaskFinish, WarTaskEnd}
 import org.scalatest.WordSpec
-import sources.{AkkaSources, ImageSources}
+import sources.{AkkaTestSources, ImageTestSources}
 
-class ClientActorTest extends WordSpec with AkkaSources with ImageSources {
+class ClientActorTest extends WordSpec with AkkaTestSources with ImageTestSources {
+  import testkit._
   lazy val actor = TestActorRef[ClientActor](Props(new ClientActor(Nil)))
 
   def nothingActor() = actorSystem.actorOf(Props(new Actor {

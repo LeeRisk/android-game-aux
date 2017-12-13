@@ -4,10 +4,10 @@ import models.ClientRequest
 import nyhx.Images
 import org.scalatest.{FunSuite, WordSpec}
 import org.slf4j.{Logger, LoggerFactory}
-import sources.ImageSources
+import sources.ImageTestSources
 import utensil.FindPicBuild
 
-class WarHelperTest extends WordSpec with ImageSources {
+class WarHelperTest extends WordSpec with ImageTestSources {
   val x = new WarHelper with ScenesHelper with BaseHelper {
     override def logger: Logger = LoggerFactory.getLogger("xxx")
   }

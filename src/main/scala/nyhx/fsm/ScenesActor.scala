@@ -7,37 +7,7 @@ import nyhx.Find.FindPicBuildingWithRun
 import org.slf4j.LoggerFactory
 import utensil.{IsFindPic, NoFindPic}
 
-//class ReturnsActor extends Actor {
-//  override def receive: Receive = {
-//    case c: ClientRequest =>
-//      val result = Find(Images.returns.toGoal)(c).run()
-//      if(result.isFind) {
-//        sender() ! Commands().addTap(result.point)
-//      } else {
-//        sender() ! Commands()
-//        context.parent ! TaskFinish
-//      }
-//  }
-//}
 
-
-//object ScenesMoveActor {
-//  def apply(seq: ScenesStatus*): Props = Props(new ScenesMoveActor(seq))
-//}
-//
-//class ScenesMoveActor(seq: Seq[ScenesStatus]) extends Actor {
-//  private var workActorList = seq.map(e => context.actorOf(Props(new ScenesActor(e))))
-//
-//  override def receive: Receive = {
-//    case c: ClientRequest => workActorList.head forward c
-//    case TaskFinish       =>
-//      context.stop(workActorList.head)
-//      workActorList = workActorList.tail
-//      if(workActorList.isEmpty) context.parent ! TaskFinish
-//
-//  }
-//}
-//
 object ScenesActor {
 
   trait Status
@@ -45,6 +15,8 @@ object ScenesActor {
   object Returns extends Status
 
   object GotoRoom extends Status
+
+  object GotoGruen extends Status
 
   object Failure extends Status
 
@@ -54,6 +26,8 @@ object ScenesActor {
   def returns = Props(new ScenesActor(Returns))
 
   def gotoRoom = Props(new ScenesActor(GotoRoom))
+
+  def gotoGruen = Props(new ScenesActor(GotoGruen))
 }
 
 import nyhx.fsm.ScenesActor._
@@ -80,6 +54,14 @@ class ScenesActor(goal: Status) extends Actor with FSM[Status, BaseData] {
         case (false, true)  => stay().replying(Commands().addTap(gotoRoom.point))
         case (true, _)      => goto(Finish).replying(Commands())
         case (false, false) => goto(Failure).replying(Commands())
+      }
+  }
+  when(GotoGruen) {
+    case Event(c: ClientRequest, _) =>
+      val gotoGakuen = Find(Images.returns_gakuen).run(c)
+      gotoGakuen match {
+        case IsFindPic(point) => goto(Finish).replying(Commands().addTap(point))
+        case NoFindPic()      => goto(Finish).replying(Commands())
       }
   }
 
