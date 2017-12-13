@@ -29,11 +29,15 @@ object FindActor {
 
   object NoFind extends Condition
 
+  object MustFind extends Condition
+
+  object IfFind extends Condition
+
   object Nothing extends Condition
 
   type Func = ClientRequest => FindPicBuild[FindPicBuild.Request]
 
-  def touch(f: Func) = Props(new FindActor(Touch, Nothing, f))
+  def touch(f: Func, condition: Condition = MustFind) = Props(new FindActor(Touch, condition, f))
 
   def keepTouch(f: Func) = Props(new FindActor(KeepTouch, Nothing, f))
 
@@ -52,7 +56,7 @@ class FindActor(status: FindActor.Status,
   startWith(status, condition)
 
   when(Touch) {
-    case Event(c: ClientRequest, Nothing) =>
+    case Event(c: ClientRequest, MustFind) =>
       val goal = findPicBuild(c).goal.get.simpleName
       findPicBuild.run(c) match {
         case NoFindPic()      => goto(FailureNoFind).replying(Commands())
@@ -60,7 +64,15 @@ class FindActor(status: FindActor.Status,
           logger.info(s"($goal) is find; touch")
           goto(Success).replying(Commands().tap(point))
       }
-    case Event(c: ClientRequest, _)       =>
+    case Event(c: ClientRequest, IfFind)   =>
+      val goal = findPicBuild(c).goal.get.simpleName
+      findPicBuild.run(c) match {
+        case NoFindPic()      => goto(Success).replying(Commands())
+        case IsFindPic(point) =>
+          logger.info(s"($goal) is find; touch")
+          goto(Success).replying(Commands().tap(point))
+      }
+    case Event(c: ClientRequest, _)        =>
       logger.error("no supper")
       goto(FailureNoFind)
   }

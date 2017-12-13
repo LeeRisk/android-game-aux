@@ -24,7 +24,7 @@ class DismissedActorTest extends WordSpec
   }
   "pass select student" in {
     actor ! TaskFinish
-    assert(actor.underlyingActor.stateName === DismissedActor.Determine)
+    assert(actor.underlyingActor.stateName === DismissedActor.DismissedSelectDetermine)
   }
 
 

@@ -26,9 +26,9 @@ object DismissedActor {
 
   object Move extends Status
 
-  object Determine extends Status
+  object DismissedSelectDetermine extends Status
 
-  object DetermineDetermine extends Status
+  object Determine extends Status
 
   type Data = BaseData
 }
@@ -71,24 +71,27 @@ class DismissedActor extends FSM[Status, Data]
   )
 
   def dismissedDetermineActor() = List(
+    context actorOf FindActor.touch(Find(Images.determine), FindActor.IfFind),
     context actorOf FindActor.touch(Find(Images.YuanZiWu.dismissedDetermine)),
     context actorOf JustActor.justTap(Point(1, 1))
   )
 
   startWith(Move, WorkActorList(moveActors()))
   when(Move)(work(goto(SelectStudent).using(WorkActorList(dismissedSelectActor()))))
-  when(SelectStudent)(work(goto(Determine)))
-  when(Determine) {
+  when(SelectStudent)(work(goto(DismissedSelectDetermine)))
+  when(DismissedSelectDetermine) {
     case Event(c: ClientRequest, _) =>
       val result = Find(Images.YuanZiWu.dismissedSelectStudentDetermine).run(c)
+      log.info(s"exist need dismissed (${result.isFind})")
       if(result.isFind)
-        goto(DetermineDetermine)
+        goto(Determine)
           .using(WorkActorList(dismissedDetermineActor()))
-          .replying(Commands())
+          .replying(Commands().tap(result.point))
       else
-        goto(Finish).replying(Commands())
+        goto(Finish)
+          .replying(Commands())
   }
-  when(DetermineDetermine)(work(goto(SelectStudent).using(WorkActorList(dismissedSelectActor()))))
+  when(Determine)(work(goto(SelectStudent).using(WorkActorList(dismissedSelectActor()))))
 
 
   when(Finish) {
@@ -134,7 +137,7 @@ class DismissedSelectActor extends FSM[Status, Data]
   }
   when(TapStudent) {
     case Event(c: ClientRequest, _) =>
-      val points = 0 to 1 map (_ * 175 + 65) map (x => Point(x, 179))
+      val points = 0 to 3 map (_ * 175 + 65) map (x => Point(x, 179))
       val commands = points.foldLeft(Commands())((l, r) =>
         l.tap(r).delay(500)
       )
