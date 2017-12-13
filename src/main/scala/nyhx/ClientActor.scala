@@ -16,7 +16,7 @@ object ClientActor {
 
   trait Data
 
-  case class ActorRefData(actorRef: ActorRef) extends Data
+  case class WorkActor(actorRef: ActorRef) extends Data
 
 }
 
@@ -24,40 +24,40 @@ import nyhx.ClientActor._
 
 class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, ClientActor.Data] {
 
+  import context.actorOf
 
   val logger = LoggerFactory.getLogger("client-actor")
   val warNum = 50
 
   def mkDismissed() = context.actorOf(Props(new DismissedActor()))
 
-  def mkWar() =
-    if(args.contains("war-2-6"))
-      context.actorOf(Props(new WarAreaTwoSix(warNum)))
-    else if(args.contains("war-6-1"))
-      context.actorOf(Props(new WarAreaSixActor()))
-    else
-      context.actorOf(Props(new WdjActor()))
-//      context.actorOf(Props(new WarAreaTwoSix(warNum)))
+  def contains(s: String) = args.contains(s.trim)
 
-  startWith(War, ActorRefData(mkWar()))
+  def startStatus() = {
+    /**/ if(contains("war-2-6")) startWith(War, WorkActor(actorOf(Props(new WarAreaTwoSix(warNum)))))
+    else if(contains("war-6-4")) startWith(War, WorkActor(actorOf(Props(new WarAreaSixActor()))))
+    else if(contains("wdj    ")) startWith(War, WorkActor(actorOf(Props(new WdjActor(warNum)))))
+  }
 
+  startStatus()
   when(War) {
-    case Event(x: ClientRequest, ActorRefData(actorRef)) =>
+    case Event(x: ClientRequest, WorkActor(actorRef)) =>
       actorRef forward x
       stay()
-    case Event(WarTaskEnd(_), ActorRefData(actorRef))    =>
+    case Event(WarTaskEnd(_), WorkActor(actorRef))    =>
       logger.info("war finish go to dismissed")
       context.stop(actorRef)
-      goto(Dismissed) using ActorRefData(mkDismissed())
+      goto(Dismissed) using WorkActor(mkDismissed())
   }
 
   when(Dismissed) {
-    case Event(x: ClientRequest, ActorRefData(actorRef))       =>
+    case Event(x: ClientRequest, WorkActor(actorRef))       =>
       actorRef forward x
       stay()
-    case Event(DismissedTaskFinish(_), ActorRefData(actorRef)) =>
+    case Event(DismissedTaskFinish(_), WorkActor(actorRef)) =>
       logger.info("dismissed finish go to war")
       context.stop(actorRef)
-      goto(War) using ActorRefData(mkWar())
+      stay()
+//      goto(War) using WorkActor(mkWar())
   }
 }
