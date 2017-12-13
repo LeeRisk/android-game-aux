@@ -50,7 +50,7 @@ class ClientActor(args: Seq[String]) extends Actor with FSM[ClientActor.Status, 
   }
 
   val map = statusMap()
-  startWith(War, map(War)())
+  startWith(Dismissed, map(Dismissed)())
   when(War) {
     case Event(x: ClientRequest, WorkActor(actorRef)) =>
       actorRef forward x

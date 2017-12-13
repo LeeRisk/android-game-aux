@@ -74,7 +74,7 @@ trait WarHelper {
     val a = FindAux(Images.Adventure.needSurvey.toGoal).andThen(_.withThreshold(0.93))(c).run()
     println(a.isFind)
     val backup = FindAux(Images.Adventure.selectA.toGoal).touch
-    if(a.isFind) Result.Success(Commands().addTap(a.point))
+    if(a.isFind) Result.Success(Commands().tap(a.point))
     else backup(c)
   }
 
@@ -82,7 +82,7 @@ trait WarHelper {
     better.files.File(x.image.name).copyTo(
       better.files.File(s"D:\\random\\${UUID.randomUUID().toString}.png")
     )
-    Result.Success(Commands().addDelay(10))
+    Result.Success(Commands().delay(10))
 
   }
 
@@ -98,10 +98,10 @@ trait WarHelper {
 
   def goToWarArea(area: Point, zone: Int) = RecAction { implicit c =>
     val toArea = Commands()
-      .addTap(Points.Area.one).addDelay(1000)
-      .addTap(area).addDelay(1000)
+      .tap(Points.Area.one).delay(1000)
+      .tap(area).delay(1000)
     Result.Success(
-      (1 until zone).foldLeft(toArea)((l, r) => l.addTap(Points.Adventure.next).addDelay(1000))
+      (1 until zone).foldLeft(toArea)((l, r) => l.tap(Points.Adventure.next).delay(1000))
     )
   }
 
@@ -123,11 +123,11 @@ trait WarHelper {
     result match {
       case IsFindPic(point) =>
         logger.info("get war reward ; go to next")
-        Result.Success(Commands().addDelay(100))
+        Result.Success(Commands().delay(100))
 
       case NoFindPic() =>
         logger.info("have not get war reward ; try again")
-        Result.Execution(Commands().addTap(Point(0, 0)))
+        Result.Execution(Commands().tap(Point(0, 0)))
     }
   }
 

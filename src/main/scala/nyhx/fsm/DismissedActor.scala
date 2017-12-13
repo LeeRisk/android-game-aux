@@ -83,7 +83,7 @@ class DismissedActor extends FSM[Status, Data]
       if(result.isFind)
         goto(DetermineDetermine)
           .using(WorkActorList(dismissedDetermineActor()))
-          .replying(Commands().addTap(result.point))
+          .replying(Commands().tap(result.point).delay(1000).tap(Point(1,1)).delay(1000))
       else
         goto(Finish).replying(Commands())
   }
@@ -127,15 +127,15 @@ class DismissedSelectActor extends FSM[Status, Data]
   when(SureRetrieve) {
     case Event(c: ClientRequest, _) =>
       Find(Images.Retrieve.attributes).run(c) match {
-        case IsFindPic(point) => stay().replying(Commands().addTap(Point(1, 1)))
-        case NoFindPic()      => goto(TapStudent).replying(Commands().addDelay(0))
+        case IsFindPic(point) => stay().replying(Commands().tap(Point(1, 1)))
+        case NoFindPic()      => goto(TapStudent).replying(Commands().delay(0))
       }
   }
   when(TapStudent) {
     case Event(c: ClientRequest, _) =>
       val points = 0 to 1 map (_ * 175 + 65) map (x => Point(x, 179))
       val commands = points.foldLeft(Commands())((l, r) =>
-        l.addTap(r).addDelay(500)
+        l.tap(r).delay(500)
       )
 
       goto(Finish).replying(commands)

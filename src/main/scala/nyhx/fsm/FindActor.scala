@@ -58,7 +58,7 @@ class FindActor(status: FindActor.Status,
         case NoFindPic()      => goto(FailureNoFind).replying(Commands())
         case IsFindPic(point) =>
           logger.info(s"($goal) is find; touch")
-          goto(Success).replying(Commands().addTap(point))
+          goto(Success).replying(Commands().tap(point))
       }
     case Event(c: ClientRequest, _)       =>
       logger.error("no supper")
@@ -71,7 +71,7 @@ class FindActor(status: FindActor.Status,
         case NoFindPic()      => goto(Success).replying(Commands())
         case IsFindPic(point) =>
           logger.info(s"($goal) is find; keep touch")
-          stay().replying(Commands().addTap(point))
+          stay().replying(Commands().tap(point))
       }
   }
 

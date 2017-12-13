@@ -36,7 +36,7 @@ class DismissedActor extends Actor
   def selectStudent = RecAction { implicit c =>
     val points = 0 to 5 map (_ * 175 + 65) map (x => Point(x, 179))
     val commands = points.foldLeft(Commands())((l, r) =>
-      l.addTap(r).addDelay(200)
+      l.tap(r).delay(200)
     )
     val result = FindAux(Images.lv1.toGoal)(c).run()
     if(result.noFind)
@@ -50,7 +50,7 @@ class DismissedActor extends Actor
     val result = FindAux(Images.YuanZiWu.dismissedSelectStudentDetermine.toGoal)(c).run()
     result match {
       case IsFindPic(point) =>
-        Result.Success(Commands().addTap(point))
+        Result.Success(Commands().tap(point))
       case NoFindPic()      =>
         Result.Become(end)
     }

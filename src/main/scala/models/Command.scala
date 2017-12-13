@@ -21,7 +21,7 @@ case class DelayCommand(time: Int, action: String = "delay") extends Command {
 case class Commands(seq: Command*) {
   def add(action: Command) = Commands((seq :+ action): _*)
 
-  def addTap(point: Point) = add(TapCommand(point.x, point.y))
+  def tap(point: Point) = add(TapCommand(point.x, point.y))
 
-  def addDelay(time: Int) = add(DelayCommand(time))
+  def delay(time: Int) = add(DelayCommand(time))
 }

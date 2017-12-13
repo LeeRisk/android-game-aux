@@ -16,7 +16,7 @@ trait ScenesHelper {
       Result.Success()
     else
       FindAux.goToRoom(clientRequest).run() match {
-        case IsFindPic(point) => Result.Execution(Commands().addTap(point))
+        case IsFindPic(point) => Result.Execution(Commands().tap(point))
         case NoFindPic()      => Result.Success()
       }
   }
@@ -26,7 +26,7 @@ trait ScenesHelper {
       Result.Success()
     else
       FindAux.goToGakuen(clientRequest).run() match {
-        case IsFindPic(point) => Result.Execution(Commands().addTap(point))
+        case IsFindPic(point) => Result.Execution(Commands().tap(point))
         case NoFindPic()      => Result.Success()
       }
   }
@@ -35,7 +35,7 @@ trait ScenesHelper {
     val result = FindAux(Images.returns.toGoal)(clientRequest).run()
     logger.info(s"find return :${result.isFind}")
     result match {
-      case IsFindPic(point) => Result.Execution(Commands().addTap(point))
+      case IsFindPic(point) => Result.Execution(Commands().tap(point))
       case NoFindPic()      => Result.Success()
     }
   }

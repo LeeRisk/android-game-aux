@@ -32,7 +32,7 @@ class JustActor(commands: Commands) extends Actor {
 }
 
 object JustActor {
-  def justDelay(time: Int) = Props(new JustActor(Commands().addDelay(time)))
+  def justDelay(time: Int) = Props(new JustActor(Commands().delay(time)))
 
-  def justTap(point: Point) = Props(new JustActor(Commands().addTap(point)))
+  def justTap(point: Point) = Props(new JustActor(Commands().tap(point)))
 }

@@ -37,7 +37,7 @@ object FindAux {
       val name = findPicBuild.goal.get.simpleName
       logger.info(s"find $name : (${result.isFind})")
       result match {
-        case IsFindPic(point) => Result.Success(Commands().addTap(point))
+        case IsFindPic(point) => Result.Success(Commands().tap(point))
         case NoFindPic()      => Result.Failure(NoFindPicException(name))
       }
     }
@@ -49,7 +49,7 @@ object FindAux {
       val name = findPicBuild.goal.get.simpleName
       logger.info(s"wait find $name : (${result.isFind})")
       result match {
-        case IsFindPic(point) => Result.Success(Commands().addDelay(100))
+        case IsFindPic(point) => Result.Success(Commands().delay(100))
         case NoFindPic()      => Result.Execution(Commands())
       }
     }

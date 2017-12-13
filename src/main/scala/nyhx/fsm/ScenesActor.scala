@@ -41,7 +41,7 @@ class ScenesActor(goal: Status) extends Actor with FSM[Status, BaseData] {
     case Event(c: ClientRequest, _) =>
       logger.debug("at return")
       Find(Images.returns.toGoal)(c).run() match {
-        case IsFindPic(point) => stay().replying(Commands().addTap(point))
+        case IsFindPic(point) => stay().replying(Commands().tap(point))
         case NoFindPic()      => goto(Finish).replying(Commands())
       }
   }
@@ -51,7 +51,7 @@ class ScenesActor(goal: Status) extends Actor with FSM[Status, BaseData] {
       val adventure = Find(Images.Adventure.adventure).run(c)
       val gotoRoom = Find(Images.returns_room).run(c)
       (adventure.isFind, gotoRoom.isFind) match {
-        case (false, true)  => stay().replying(Commands().addTap(gotoRoom.point))
+        case (false, true)  => stay().replying(Commands().tap(gotoRoom.point))
         case (true, _)      => goto(Finish).replying(Commands())
         case (false, false) => goto(Failure).replying(Commands())
       }
@@ -60,7 +60,7 @@ class ScenesActor(goal: Status) extends Actor with FSM[Status, BaseData] {
     case Event(c: ClientRequest, _) =>
       val gotoGakuen = Find(Images.returns_gakuen).run(c)
       gotoGakuen match {
-        case IsFindPic(point) => goto(Finish).replying(Commands().addTap(point))
+        case IsFindPic(point) => goto(Finish).replying(Commands().tap(point))
         case NoFindPic()      => goto(Finish).replying(Commands())
       }
   }

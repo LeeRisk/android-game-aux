@@ -56,7 +56,7 @@ class WdjWarActor extends FSM[Status, Data]
       Find(Images.Wdj.fightResult)(c).run() match {
         case IsFindPic(point) =>
           logger.info("sure war result")
-          stay().replying(Commands().addTap(Point(1, 1)))
+          stay().replying(Commands().tap(Point(1, 1)))
         case NoFindPic()      =>
           logger.info("war end")
           context.parent ! TaskFinish
