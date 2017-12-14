@@ -16,10 +16,7 @@ class DismissedActorTest extends WordSpec
   lazy val testProbe = TestProbe()
   lazy val actor     = TestActorRef[DismissedActor](Props(new DismissedActor))
   "pass move" in {
-
-    1 to actor.underlyingActor.moveActors().size foreach{_=>
-      actor ! TaskFinish
-    }
+    actor ! TaskFinish
     assert(actor.underlyingActor.stateName === DismissedActor.SelectStudent)
   }
   "pass select student" in {
