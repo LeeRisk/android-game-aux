@@ -69,11 +69,11 @@ class WdjActor(totalWarNum: Int = 10) extends FSM[Status, Data] with FsmHelper[S
   import context.actorOf
 
   def moveActors() = context.actorOf(ExecWorkActor(
-    actorOf(ScenesActor.returns),
-    actorOf(ScenesActor.gotoRoom),
-    actorOf(FindActor.touch(Find(Images.Wdj.wuDouJi))),
-    actorOf(FindActor.waitFind(FindActor.IsFind, Find(Images.returns))),
-    actorOf(FindActor.touch(Find(Images.Wdj.shenShen))),
+    (ScenesActor.returns),
+    (ScenesActor.gotoRoom),
+    (FindActor.touch(Find(Images.Wdj.wuDouJi))),
+    (FindActor.waitFind(FindActor.IsFind, Find(Images.returns))),
+    (FindActor.touch(Find(Images.Wdj.shenShen))),
   ))
 
   def warActor() = actorOf(Props(new WdjWarActor))

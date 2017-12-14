@@ -26,7 +26,7 @@ class ClientActor(args: Seq[String]) extends FSM[Status, Data] with FsmHelper[St
   import context.actorOf
 
   val logger = LoggerFactory.getLogger("client-actor")
-  val warNum = 1
+  val warNum = 100
 
   def mkDismissed() = context.actorOf(Props(new DismissedActor()))
 
@@ -50,6 +50,7 @@ class ClientActor(args: Seq[String]) extends FSM[Status, Data] with FsmHelper[St
 
   val map = statusMap()
   startWith(War, map(War)())
+//  startWith(Dismissed, map(Dismissed)())
   when(War)(work(nextStatus = goto(Dismissed).using(map(Dismissed)())))
   when(Dismissed)(work(nextStatus = goto(War).using(map(War)())))
 

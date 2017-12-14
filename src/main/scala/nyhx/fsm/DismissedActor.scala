@@ -54,14 +54,14 @@ class DismissedActor extends FSM[Status, Data] with FsmHelper[Status, Data] {
   import context.actorOf
 
   def moveActors() = context actorOf ExecWorkActor(
-    actorOf(ScenesActor.returns),
-    actorOf(ScenesActor.gotoGruen),
-    actorOf(FindActor.touch(Find(Images.YuanZiWu.yuanZiWu))),
+    (ScenesActor.returns),
+    (ScenesActor.gotoGruen),
+    (FindActor.touch(Find(Images.YuanZiWu.yuanZiWu))),
 
-    actorOf(JustActor.justDelay(3000)),
+    (JustActor.justDelay(3000)),
 
-    actorOf(FindActor.waitFind(FindActor.IsFind, Find(Images.YuanZiWu.dismissed))),
-    actorOf(FindActor.touch(Find(Images.YuanZiWu.dismissed))),
+    (FindActor.waitFind(FindActor.IsFind, Find(Images.YuanZiWu.dismissed))),
+    (FindActor.touch(Find(Images.YuanZiWu.dismissed))),
 
   )
 
@@ -70,10 +70,10 @@ class DismissedActor extends FSM[Status, Data] with FsmHelper[Status, Data] {
 
 
   def dismissedDetermineActor() = context actorOf ExecWorkActor(
-    context actorOf FindActor.touch(Find(Images.determine), FindActor.IfFind),
-    context actorOf FindActor.touch(Find(Images.YuanZiWu.dismissedDetermine)),
-    context actorOf JustActor.justTap(Point(1, 1)),
-    context actorOf JustActor.justTap(Point(1, 1)),
+    FindActor.touch(Find(Images.determine), FindActor.IfFind),
+    FindActor.touch(Find(Images.YuanZiWu.dismissedDetermine)),
+    JustActor.justTap(Point(1, 1)),
+    JustActor.justTap(Point(1, 1)),
   )
 
   startWith(Move, moveActors())
@@ -110,19 +110,19 @@ class DismissedActor extends FSM[Status, Data] with FsmHelper[Status, Data] {
 class DismissedSelectActor extends FSM[Status, Data] with FsmHelper[Status, Data] {
 
   def touchSelect() = context actorOf ExecWorkActor(
-    context actorOf FindActor.waitFind(IsFind, Find(Images.YuanZiWu.selectStudent)),
-    context actorOf FindActor.touch(Find(Images.YuanZiWu.selectStudent))
+    FindActor.waitFind(IsFind, Find(Images.YuanZiWu.selectStudent)),
+    FindActor.touch(Find(Images.YuanZiWu.selectStudent))
   )
 
   def touchRetrieve() = context actorOf ExecWorkActor(
-    context actorOf FindActor.waitFind(IsFind, Find(Images.Retrieve.retrieve)),
-    context actorOf FindActor.touch(Find(Images.Retrieve.retrieve)),
+    FindActor.waitFind(IsFind, Find(Images.Retrieve.retrieve)),
+    FindActor.touch(Find(Images.Retrieve.retrieve)),
 
-    context actorOf FindActor.waitFind(IsFind, Find(Images.Retrieve.an)),
-    context actorOf FindActor.touch(Find(Images.Retrieve.an)),
+    FindActor.waitFind(IsFind, Find(Images.Retrieve.an)),
+    FindActor.touch(Find(Images.Retrieve.an)),
 
-    context actorOf FindActor.waitFind(IsFind, Find(Images.Retrieve.shui)),
-    context actorOf FindActor.touch(Find(Images.Retrieve.shui))
+    FindActor.waitFind(IsFind, Find(Images.Retrieve.shui)),
+    FindActor.touch(Find(Images.Retrieve.shui))
   )
 
   startWith(TouchSelect, touchSelect())
@@ -137,7 +137,7 @@ class DismissedSelectActor extends FSM[Status, Data] with FsmHelper[Status, Data
   }
   when(TapStudent) {
     case Event(c: ClientRequest, _) =>
-      val points = 0 to 0 map (_ * 175 + 65) map (x => Point(x, 179))
+      val points = 0 to 4 map (_ * 175 + 65) map (x => Point(x, 179))
       val commands = points.foldLeft(Commands())((l, r) =>
         l.tap(r).delay(500)
       )
