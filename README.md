@@ -20,7 +20,7 @@
 
 
 ### 目标/效果
-![goal](doc.gif)
+![goal](doc/war.gif)
 
 ### 准备 - android
 
