@@ -49,12 +49,11 @@ import DismissedActor._
   * else
   * return
   */
-class DismissedActor extends FSM[Status, Data]
-  with FsmHelper[Status, Data] {
+class DismissedActor extends FSM[Status, Data] with FsmHelper[Status, Data] {
 
   import context.actorOf
 
-  def moveActors() = List(
+  def moveActors() = context actorOf ExecWorkActor(
     actorOf(ScenesActor.returns),
     actorOf(ScenesActor.gotoGruen),
     actorOf(FindActor.touch(Find(Images.YuanZiWu.yuanZiWu))),
@@ -66,32 +65,36 @@ class DismissedActor extends FSM[Status, Data]
 
   )
 
-  def dismissedSelectActor() = List(
+  def dismissedSelectActor() =
     context actorOf Props(new DismissedSelectActor)
-  )
 
-  def dismissedDetermineActor() = List(
+
+  def dismissedDetermineActor() = context actorOf ExecWorkActor(
     context actorOf FindActor.touch(Find(Images.determine), FindActor.IfFind),
     context actorOf FindActor.touch(Find(Images.YuanZiWu.dismissedDetermine)),
-    context actorOf JustActor.justTap(Point(1, 1))
+    context actorOf JustActor.justTap(Point(1, 1)),
+    context actorOf JustActor.justTap(Point(1, 1)),
   )
 
-  startWith(Move, WorkActorList(moveActors()))
-  when(Move)(work(goto(SelectStudent).using(WorkActorList(dismissedSelectActor()))))
-  when(SelectStudent)(work(goto(DismissedSelectDetermine)))
+  startWith(Move, moveActors())
+  when(Move)(work(nextStatus = goto(SelectStudent).using(dismissedSelectActor())))
+  when(SelectStudent)(work(goto(DismissedSelectDetermine).using(NoData)))
   when(DismissedSelectDetermine) {
     case Event(c: ClientRequest, _) =>
       val result = Find(Images.YuanZiWu.dismissedSelectStudentDetermine).run(c)
       log.info(s"exist need dismissed (${result.isFind})")
       if(result.isFind)
-        goto(Determine)
-          .using(WorkActorList(dismissedDetermineActor()))
+        Build
+          .goto(Determine).using(dismissedDetermineActor())
           .replying(Commands().tap(result.point))
+          .build()
       else
-        goto(Finish)
+        Build
+          .goto(Finish).using(NoData)
           .replying(Commands())
+          .build()
   }
-  when(Determine)(work(goto(SelectStudent).using(WorkActorList(dismissedSelectActor()))))
+  when(Determine)(work(goto(SelectStudent).using(dismissedSelectActor())))
 
 
   when(Finish) {
@@ -104,17 +107,14 @@ class DismissedActor extends FSM[Status, Data]
   }
 }
 
-class DismissedSelectActor extends FSM[Status, Data]
-  with FsmHelper[Status, Data] {
+class DismissedSelectActor extends FSM[Status, Data] with FsmHelper[Status, Data] {
 
-  import context.actorOf
-
-  def touchSelect() = List(
+  def touchSelect() = context actorOf ExecWorkActor(
     context actorOf FindActor.waitFind(IsFind, Find(Images.YuanZiWu.selectStudent)),
     context actorOf FindActor.touch(Find(Images.YuanZiWu.selectStudent))
   )
 
-  def touchRetrieve() = List(
+  def touchRetrieve() = context actorOf ExecWorkActor(
     context actorOf FindActor.waitFind(IsFind, Find(Images.Retrieve.retrieve)),
     context actorOf FindActor.touch(Find(Images.Retrieve.retrieve)),
 
@@ -125,24 +125,23 @@ class DismissedSelectActor extends FSM[Status, Data]
     context actorOf FindActor.touch(Find(Images.Retrieve.shui))
   )
 
-  startWith(TouchSelect, WorkActorList(touchSelect()))
-  when(TouchSelect)(work(goto(TouchRetrieve).using(WorkActorList(touchRetrieve()))))
-  when(TouchRetrieve)(work(goto(SureRetrieve).using(NoData)))
+  startWith(TouchSelect, touchSelect())
+  when(TouchSelect)(work(nextStatus = goto(TouchRetrieve).using(touchRetrieve())))
+  when(TouchRetrieve)(work(nextStatus = goto(SureRetrieve).using(NoData)))
   when(SureRetrieve) {
     case Event(c: ClientRequest, _) =>
       Find(Images.Retrieve.attributes).run(c) match {
-        case IsFindPic(point) => stay().replying(Commands().tap(Point(1, 1)))
-        case NoFindPic()      => goto(TapStudent).replying(Commands().delay(0))
+        case IsFindPic(point) => Build.stay().replying(Commands().tap(Point(1, 1))).build()
+        case NoFindPic()      => Build.goto(TapStudent).replying(Commands().delay(0)).build()
       }
   }
   when(TapStudent) {
     case Event(c: ClientRequest, _) =>
-      val points = 0 to 3 map (_ * 175 + 65) map (x => Point(x, 179))
+      val points = 0 to 0 map (_ * 175 + 65) map (x => Point(x, 179))
       val commands = points.foldLeft(Commands())((l, r) =>
         l.tap(r).delay(500)
       )
-
-      goto(Finish).replying(commands)
+      Build.goto(Finish).replying(commands).build()
   }
   when(Finish) {
     case _ =>

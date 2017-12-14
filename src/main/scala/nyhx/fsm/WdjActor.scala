@@ -1,6 +1,6 @@
 package nyhx.fsm
 
-import akka.actor.{Actor, ActorRef, FSM, Props}
+import akka.actor.{ActorRef, FSM, Props}
 import models.{ClientRequest, Commands, Point}
 import nyhx.{Find, Images}
 import org.slf4j.LoggerFactory
@@ -31,36 +31,32 @@ object WdjActor {
 
 import nyhx.fsm.WdjActor._
 
-
 class WdjWarActor extends FSM[Status, Data]
-    with FsmHelper[Status, Data] {
+  with FsmHelper[Status, Data] {
 
   import context.actorOf
 
+
   val logger = LoggerFactory.getLogger("wdj-war")
 
-  def startWar = List(
-    actorOf(FindActor.keepTouch(Find(Images.Wdj.matchBattle)))
-  )
+  def startWar() = WorkActor(actorOf(FindActor.keepTouch(Find(Images.Wdj.matchBattle))))
 
-  def waitWarEnd = List(
-    actorOf(FindActor.waitFind(FindActor.IsFind, Find(Images.Wdj.fightResult)))
-  )
+  def waitWarEnd() = WorkActor(actorOf(FindActor.waitFind(FindActor.IsFind, Find(Images.Wdj.fightResult))))
 
 
-  startWith(StartWar, WorkActorList(startWar))
-  when(StartWar)(work(nextState = goto(WaitWarEnd).using(WorkActorList(waitWarEnd))))
-  when(WaitWarEnd)(work(nextState = goto(SureWarResult).using(NoData)))
+  startWith(StartWar, startWar())
+  when(StartWar)(work(nextStatus = goto(WaitWarEnd).using(waitWarEnd())))
+  when(WaitWarEnd)(work(nextStatus = goto(SureWarResult).using(NoData)))
   when(SureWarResult) {
     case Event(c: ClientRequest, _) =>
       Find(Images.Wdj.fightResult)(c).run() match {
         case IsFindPic(point) =>
           logger.info("sure war result")
-          stay().replying(Commands().tap(Point(1, 1)))
+          Build.stay().replying(Commands().tap(Point(1, 1))).build()
         case NoFindPic()      =>
           logger.info("war end")
           context.parent ! TaskFinish
-          goto(Finish).replying(Commands())
+          Build.goto(Finish).replying(Commands()).build()
       }
   }
   when(Finish) { case _ => logger.info("finish"); stay() }
@@ -68,24 +64,23 @@ class WdjWarActor extends FSM[Status, Data]
   implicit def workActorListData(workActorList: WorkActorList): Data = workActorList
 }
 
-class WdjActor(totalWarNum: Int = 10) extends FSM[Status, Data]
-    with FsmHelper[Status, Data] {
+class WdjActor(totalWarNum: Int = 10) extends FSM[Status, Data] with FsmHelper[Status, Data] {
 
   import context.actorOf
 
-  def moveActors() = List(
+  def moveActors() = context.actorOf(ExecWorkActor(
     actorOf(ScenesActor.returns),
     actorOf(ScenesActor.gotoRoom),
     actorOf(FindActor.touch(Find(Images.Wdj.wuDouJi))),
     actorOf(FindActor.waitFind(FindActor.IsFind, Find(Images.returns))),
     actorOf(FindActor.touch(Find(Images.Wdj.shenShen))),
-  )
+  ))
 
   def warActor() = actorOf(Props(new WdjWarActor))
 
 
-  startWith(Move, WorkActorList(moveActors()))
-  when(Move)(work(nextState = goto(War).using(WarNum(0, warActor()))))
+  startWith(Move, moveActors())
+  when(Move)(work(nextStatus = goto(War).using(WarNum(0, warActor()))))
   when(War) {
     case Event(c: ClientRequest, WarNum(i, actorRef))               =>
       actorRef forward c
@@ -97,8 +92,8 @@ class WdjActor(totalWarNum: Int = 10) extends FSM[Status, Data]
     case Event(TaskFinish, WarNum(i, actorRef)) if i >= totalWarNum =>
       context.stop(actorRef)
       goto(Finish)
-
   }
+
   when(Finish) { case _ =>
     logger.info("finish")
     stay()

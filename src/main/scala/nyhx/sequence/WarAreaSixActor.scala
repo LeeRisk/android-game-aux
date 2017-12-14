@@ -6,20 +6,22 @@ import akka.actor.Actor
 import models._
 import nyhx._
 import FindAux.findPicBuilding2FindAux
+import nyhx.fsm.TaskFinish
 import utensil.{IsFindPic, NoFindPic}
 
-class WarAreaSixActor
+class WarAreaSixActor(warNum:Int=100)
   extends Actor
     with ActorHelper
     with BaseHelper
     with ScenesHelper
     with WarHelper {
-
+  logger.info("create war ara six actor")
 
   val sequences: Sequence = (Sequence("war")
     next goToAdventure
     next goToWarArea(Points.Area.six, 4)
-    repeat(warPoint_B, 100)
+    repeat(warPoint_B, warNum)
+    next end
     )
 
 
@@ -34,7 +36,7 @@ class WarAreaSixActor
       )
   }
 
-  def end = RecAction { implicit c => println("end"); ??? }
+  def end = RecAction { implicit c => context.parent ! TaskFinish;Result.Success(Commands()) }
 
 }
 

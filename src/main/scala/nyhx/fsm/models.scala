@@ -20,7 +20,7 @@ object UnInit extends BaseData
 
 object NoData extends BaseData
 
-//case class WorkActor(actorRef: ActorRef) extends BaseData
+case class WorkActor(actorRef: ActorRef) extends BaseData
 
 case class WorkActorList(actorRef: List[ActorRef]) extends BaseData
 
